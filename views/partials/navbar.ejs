@@ -1,0 +1,68 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold fs-4" href="/eventos">
+      <i class="bi bi-trophy-fill me-1"></i>SportEvents
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="/eventos"><i class="bi bi-calendar-event me-1"></i>Eventos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/noticias"><i class="bi bi-newspaper me-1"></i>Noticias</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="bi bi-info-circle me-1"></i>Información
+          </a>
+          <ul class="dropdown-menu shadow">
+            <li><a class="dropdown-item" href="/nosotros"><i class="bi bi-trophy me-2"></i>Nosotros</a></li>
+            <li><a class="dropdown-item" href="/faq"><i class="bi bi-question-circle me-2"></i>Preguntas frecuentes</a></li>
+          </ul>
+        </li>
+        <% if (user && user.role === 'admin') { %>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="bi bi-gear-fill me-1"></i>Admin
+          </a>
+          <ul class="dropdown-menu shadow">
+            <li><a class="dropdown-item" href="/admin"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+            <li><a class="dropdown-item" href="/admin/eventos"><i class="bi bi-calendar3 me-2"></i>Gestionar Eventos</a></li>
+            <li><a class="dropdown-item" href="/admin/partidos"><i class="bi bi-controller me-2"></i>Gestionar Partidos</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-primary" href="/eventos/crear"><i class="bi bi-plus-circle me-2"></i>Crear Evento</a></li>
+          </ul>
+        </li>
+        <% } %>
+      </ul>
+
+      <ul class="navbar-nav">
+        <% if (user) { %>
+        <li class="nav-item">
+          <a class="nav-link" href="/perfil">
+            <i class="bi bi-person-circle me-1"></i><%= user.nombre %>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/auth/logout">
+            <i class="bi bi-box-arrow-right me-1"></i>Salir
+          </a>
+        </li>
+        <% } else { %>
+        <li class="nav-item">
+          <a class="nav-link" href="/auth/login"><i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-outline-light btn-sm ms-2" href="/auth/register">Registrarse</a>
+        </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>
+<%- include('./flash') %>
+<%- include('./modal-confirm') %>

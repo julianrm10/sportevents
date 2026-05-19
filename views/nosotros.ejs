@@ -1,0 +1,109 @@
+<% const title = 'Nosotros' %>
+<%- include('./partials/head') %>
+<%- include('./partials/navbar') %>
+
+<!-- Hero -->
+<div class="container-lg px-3 px-lg-4 mt-3 mb-4">
+  <section class="event-detail-hero position-relative rounded-4 overflow-hidden">
+    <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1600"
+         class="event-hero-img" alt="Nosotros">
+    <div class="event-hero-overlay"></div>
+    <div class="position-absolute top-0 start-0 end-0 bottom-0 d-flex align-items-center justify-content-center text-center text-white px-4"
+         style="z-index:1">
+      <div>
+        <h1 class="display-4 fw-bold mb-3" style="text-shadow:0 2px 8px rgba(0,0,0,.5)">
+          Sobre SportEvents
+        </h1>
+        <p class="lead mb-0" style="opacity:.85">
+          La plataforma para gestionar tus torneos y eventos deportivos
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+
+    <!-- ¿Qué es SportEvents? -->
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-8 text-center">
+        <h2 class="fw-bold mb-3"><i class="bi bi-trophy-fill text-primary me-2"></i>¿Qué es SportEvents?</h2>
+        <p class="lead text-muted">
+          SportEvents es una plataforma digital diseñada para facilitar la organización,
+          gestión y seguimiento de eventos deportivos. Desde torneos de fútbol sala hasta
+          competiciones de tenis, reunimos a equipos y competidores en un mismo espacio
+          para que solo tengas que preocuparte de jugar.
+        </p>
+        <p class="text-muted">
+          Los administradores pueden crear eventos, gestionar inscripciones de equipos y
+          registrar resultados de cada partido. Los participantes pueden inscribir sus equipos,
+          seguir la clasificación en tiempo real y consultar el calendario de partidos desde
+          cualquier dispositivo.
+        </p>
+      </div>
+    </div>
+
+    <!-- ¿Qué ofrecemos? -->
+    <h2 class="fw-bold text-center mb-4">¿Qué ofrecemos?</h2>
+    <div class="row g-4 mb-5">
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 text-center">
+          <div class="card-body py-5 px-4">
+            <div class="display-5 text-primary mb-3"><i class="bi bi-calendar3"></i></div>
+            <h5 class="fw-bold mb-2">Gestión de eventos deportivos</h5>
+            <p class="text-muted mb-0">
+              Crea y administra torneos con toda la información: lugar, fecha, deporte,
+              límite de equipos y estado del evento. Todo en un panel centralizado.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 text-center">
+          <div class="card-body py-5 px-4">
+            <div class="display-5 text-success mb-3"><i class="bi bi-shield-fill"></i></div>
+            <h5 class="fw-bold mb-2">Sistema de equipos y clasificaciones</h5>
+            <p class="text-muted mb-0">
+              Crea tu equipo, inscríbete en eventos y sigue la tabla de clasificación
+              con puntos, victorias, empates, derrotas y diferencia de goles.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 text-center">
+          <div class="card-body py-5 px-4">
+            <div class="display-5 text-warning mb-3"><i class="bi bi-bar-chart-fill"></i></div>
+            <h5 class="fw-bold mb-2">Resultados en tiempo real</h5>
+            <p class="text-muted mb-0">
+              Los administradores actualizan los marcadores y la clasificación se recalcula
+              automáticamente. Consulta quién va líder en cualquier momento.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacto -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body text-center py-5 px-4">
+        <div class="display-5 text-primary mb-3"><i class="bi bi-envelope-fill"></i></div>
+        <h3 class="fw-bold mb-3">¿Tienes alguna duda o consulta?</h3>
+        <p class="text-muted mb-4">
+          Contacta directamente con el administrador de SportEvents.
+          Estaremos encantados de ayudarte.
+        </p>
+        <a href="mailto:julian.mula96@gmail.com?subject=Consulta%20SportEvents"
+           class="btn btn-primary btn-lg px-5">
+          <i class="bi bi-envelope me-2"></i>Contactar con el administrador
+        </a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<%- include('./partials/footer') %>
+</body>
+</html>

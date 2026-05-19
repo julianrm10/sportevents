@@ -1,0 +1,461 @@
+<% const title = event.titulo %>
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<%
+const SPORT_ICON   = { futbol:'⚽', baloncesto:'🏀', tenis:'🎾', otros:'🏅' };
+const SPORT_COLOR  = { futbol:'success', baloncesto:'warning', tenis:'info', otros:'secondary' };
+const ESTADO_COLOR = { abierto:'success', en_curso:'warning', finalizado:'secondary' };
+const ESTADO_LABEL = { abierto:'Inscripciones abiertas', en_curso:'En curso', finalizado:'Finalizado' };
+const isOpen       = event.estado === 'abierto';
+const isFinished   = event.estado === 'finalizado';
+%>
+
+<main class="flex-grow-1">
+
+  <!-- Hero del evento -->
+  <%
+  const DEFAULT_IMAGES = {
+    futbol:     'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=1200',
+    baloncesto: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=1200',
+    tenis:      'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1200',
+    otros:      'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1200',
+  };
+  const heroImg = event.imagen
+    ? '/uploads/' + event.imagen
+    : DEFAULT_IMAGES[event.tipo] || DEFAULT_IMAGES.otros;
+  %>
+  <div class="container-lg px-3 px-lg-4 mt-3">
+    <div class="event-detail-hero position-relative rounded-4 overflow-hidden">
+      <img src="<%= heroImg %>" class="event-hero-img" alt="<%= event.titulo %>">
+      <div class="event-hero-overlay"></div>
+      <div class="event-hero-content p-4">
+        <a href="/eventos" class="btn btn-sm btn-outline-light mb-3">
+          <i class="bi bi-arrow-left me-1"></i>Volver a eventos
+        </a>
+        <div class="d-flex flex-wrap gap-2 mb-2">
+          <span class="badge fs-6 bg-<%= SPORT_COLOR[event.tipo] %> text-<%= ['baloncesto','tenis'].includes(event.tipo) ? 'dark':'white' %>">
+            <%= SPORT_ICON[event.tipo] %> <%= event.tipo.charAt(0).toUpperCase()+event.tipo.slice(1) %>
+          </span>
+          <span class="badge fs-6 bg-<%= ESTADO_COLOR[event.estado] %>">
+            <i class="bi bi-circle-fill me-1" style="font-size:.6rem"></i><%= ESTADO_LABEL[event.estado] %>
+          </span>
+        </div>
+        <h1 class="fw-bold text-white mb-0" style="text-shadow:0 2px 8px rgba(0,0,0,.5)"><%= event.titulo %></h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+
+    <div class="row g-4">
+
+      <!-- ── Columna principal ── -->
+      <div class="col-lg-8">
+
+        <!-- Descripción -->
+        <% if (event.descripcion) { %>
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <h5 class="fw-bold mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Descripción</h5>
+            <p class="mb-0 text-muted" style="white-space:pre-line"><%= event.descripcion %></p>
+          </div>
+        </div>
+        <% } %>
+
+        <!-- Equipos inscritos -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-white border-bottom fw-bold py-3">
+            <i class="bi bi-people-fill text-primary me-2"></i>
+            Equipos inscritos
+            <span class="badge bg-primary rounded-pill ms-2"><%= registeredTeams.length %></span>
+          </div>
+          <div class="card-body p-0">
+            <% if (!registeredTeams.length) { %>
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-person-dash fs-2 d-block mb-2"></i>
+              Aún no hay equipos inscritos.
+            </div>
+            <% } else { %>
+            <ul class="list-group list-group-flush">
+              <% registeredTeams.forEach(t => { %>
+              <li class="list-group-item d-flex align-items-center gap-3 py-3">
+                <div class="team-avatar sport-bg-<%= t.tipo %>">
+                  <%= SPORT_ICON[t.tipo] %>
+                </div>
+                <div>
+                  <div class="fw-semibold"><%= t.nombre %></div>
+                  <small class="text-muted">Creado por <%= t.creator_nombre %></small>
+                </div>
+              </li>
+              <% }) %>
+            </ul>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Partidos -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom fw-bold py-3">
+            <i class="bi bi-controller text-primary me-2"></i>
+            Partidos
+            <span class="badge bg-primary rounded-pill ms-2"><%= matches.length %></span>
+          </div>
+          <div class="card-body p-0">
+            <% if (!matches.length) { %>
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+              No hay partidos programados todavía.
+            </div>
+            <% } else { %>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Equipo 1</th>
+                    <th class="text-center">Resultado</th>
+                    <th>Equipo 2</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% matches.forEach(m => { %>
+                  <tr>
+                    <td class="fw-semibold <%= m.estado==='jugado' && m.goles_team1 > m.goles_team2 ? 'text-success' : '' %>">
+                      <%= m.team1_nombre %>
+                    </td>
+                    <td class="text-center">
+                      <% if (m.estado === 'jugado') { %>
+                      <span class="badge bg-dark fs-6 px-3 py-2">
+                        <%= m.goles_team1 %> – <%= m.goles_team2 %>
+                      </span>
+                      <% } else { %>
+                      <span class="badge bg-secondary px-3 py-2">vs</span>
+                      <% } %>
+                    </td>
+                    <td class="fw-semibold <%= m.estado==='jugado' && m.goles_team2 > m.goles_team1 ? 'text-success' : '' %>">
+                      <%= m.team2_nombre %>
+                    </td>
+                    <td class="small">
+                      <% if (m.fecha) { %>
+                        <span class="text-muted">
+                          <%= new Date(m.fecha).toLocaleString('es-ES', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) %>
+                        </span>
+                      <% } else { %>
+                        <span class="text-muted fst-italic">Fecha por confirmar</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="badge rounded-pill bg-<%= m.estado==='jugado' ? 'success' : 'warning text-dark' %>">
+                        <%= m.estado === 'jugado' ? 'Jugado' : 'Pendiente' %>
+                      </span>
+                    </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Clasificación (round-robin) -->
+        <% if (matches.length > 0 && standings.length > 0) { %>
+        <div class="card border-0 shadow-sm mt-4">
+          <div class="card-header bg-white border-bottom fw-bold py-3">
+            <i class="bi bi-trophy-fill text-warning me-2"></i>Clasificación
+            <% if (isFinished) { %>
+            <span class="badge ms-2 small fw-semibold" style="background:#b8860b;color:#fff">
+              <i class="bi bi-trophy-fill me-1"></i>Clasificación final
+            </span>
+            <% } else { %>
+            <span class="badge bg-warning text-dark ms-2 small fw-normal">En curso</span>
+            <% } %>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3">#</th>
+                  <th>Equipo</th>
+                  <th class="text-center" title="Jugados">J</th>
+                  <th class="text-center" title="Ganados">G</th>
+                  <th class="text-center" title="Empatados">E</th>
+                  <th class="text-center" title="Perdidos">P</th>
+                  <th class="text-center" title="Goles a favor">GF</th>
+                  <th class="text-center" title="Goles en contra">GC</th>
+                  <th class="text-center" title="Diferencia de goles">DG</th>
+                  <th class="text-center fw-bold" title="Puntos">Pts</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% standings.forEach((s, i) => { %>
+                <tr class="<%= i === 0 && isFinished ? 'fw-semibold' : '' %>"
+                    <% if (i === 0 && isFinished) { %>style="background:linear-gradient(90deg,#fff8dc,#fffde7)"<% } %>>
+                  <td class="ps-3">
+                    <% if (i === 0 && isFinished) { %>
+                      <span title="Campeón">🏆</span>
+                    <% } else if (i === 0) { %>
+                      <span class="text-warning">🥇</span>
+                    <% } else if (i === 1) { %>
+                      <span class="text-secondary">🥈</span>
+                    <% } else if (i === 2) { %>
+                      <span style="color:#cd7f32">🥉</span>
+                    <% } else { %>
+                      <%= i + 1 %>
+                    <% } %>
+                  </td>
+                  <td>
+                    <%= s.nombre %>
+                    <% if (i === 0 && isFinished) { %>
+                    <span class="badge ms-1 fw-semibold" style="background:#b8860b;color:#fff;font-size:.7rem">
+                      Campeón
+                    </span>
+                    <% } %>
+                  </td>
+                  <td class="text-center text-muted"><%= s.jugados %></td>
+                  <td class="text-center text-success"><%= s.ganados %></td>
+                  <td class="text-center text-muted"><%= s.empatados %></td>
+                  <td class="text-center text-danger"><%= s.perdidos %></td>
+                  <td class="text-center text-muted"><%= s.gfavor %></td>
+                  <td class="text-center text-muted"><%= s.gcontra %></td>
+                  <td class="text-center text-muted">
+                    <% const dg = s.gfavor - s.gcontra %>
+                    <span class="<%= dg > 0 ? 'text-success' : dg < 0 ? 'text-danger' : '' %>">
+                      <%= dg > 0 ? '+' : '' %><%= dg %>
+                    </span>
+                  </td>
+                  <td class="text-center fw-bold fs-6 text-primary"><%= s.puntos %></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer bg-white py-2">
+            <small class="text-muted">
+              <i class="bi bi-info-circle me-1"></i>
+              Victoria = 3 pts · Empate = 1 pt · Derrota = 0 pts
+            </small>
+          </div>
+        </div>
+        <% } %>
+
+      </div><!-- /col principal -->
+
+      <!-- ── Sidebar ── -->
+      <div class="col-lg-4">
+
+        <!-- Info del evento -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-white border-bottom fw-bold py-3">
+            <i class="bi bi-card-list text-primary me-2"></i>Información
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex gap-3 py-3">
+              <i class="bi bi-calendar3 text-primary fs-5 flex-shrink-0 mt-1"></i>
+              <div>
+                <div class="small text-muted">Fecha y hora</div>
+                <div class="fw-semibold">
+                  <%= new Date(event.fecha).toLocaleString('es-ES', {weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'}) %>
+                </div>
+              </div>
+            </li>
+            <li class="list-group-item d-flex gap-3 py-3">
+              <i class="bi bi-geo-alt text-primary fs-5 flex-shrink-0 mt-1"></i>
+              <div>
+                <div class="small text-muted">Lugar</div>
+                <div class="fw-semibold"><%= event.lugar %></div>
+              </div>
+            </li>
+            <li class="list-group-item d-flex gap-3 py-3">
+              <i class="bi bi-people text-primary fs-5 flex-shrink-0 mt-1"></i>
+              <div>
+                <div class="small text-muted">Participantes</div>
+                <div class="fw-semibold">
+                  <%= teamCount %> / <%= event.max_equipos %> equipos
+                  <% if (teamCount >= event.max_equipos) { %>
+                  <span class="badge bg-danger ms-1">Completo</span>
+                  <% } %>
+                </div>
+                <div class="progress mt-1" style="height:4px">
+                  <div class="progress-bar bg-<%= teamCount >= event.max_equipos ? 'danger' : 'primary' %>"
+                       style="width:<%= Math.min(100, Math.round(teamCount/event.max_equipos*100)) %>%"></div>
+                </div>
+              </div>
+            </li>
+            <li class="list-group-item d-flex gap-3 py-3">
+              <i class="bi bi-person-badge text-primary fs-5 flex-shrink-0 mt-1"></i>
+              <div>
+                <div class="small text-muted">Organiza</div>
+                <div class="fw-semibold"><%= event.creator_nombre %></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Acciones del usuario -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-header bg-white border-bottom fw-bold py-3">
+            <i class="bi bi-person-check text-primary me-2"></i>Mi participación
+          </div>
+          <div class="card-body">
+
+            <% if (!user) { %>
+            <!-- No autenticado -->
+            <div class="text-center py-2">
+              <i class="bi bi-lock-fill fs-1 text-muted d-block mb-3"></i>
+              <p class="text-muted mb-3">Inicia sesión para inscribir tu equipo en este evento.</p>
+              <a href="/auth/login" class="btn btn-primary w-100">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
+              </a>
+            </div>
+
+            <% } else { %>
+
+            <% if (!isFinished) { %>
+            <!-- Favorito -->
+            <form action="/eventos/favorito" method="POST" class="mb-3">
+              <input type="hidden" name="evento_id" value="<%= event.id %>">
+              <button type="submit" class="btn w-100 btn-<%= isFavorite ? 'warning' : 'outline-warning' %>">
+                <i class="bi bi-star<%= isFavorite ? '-fill' : '' %> me-2"></i>
+                <%= isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos' %>
+              </button>
+            </form>
+
+            <hr class="my-3">
+            <% } %>
+
+            <% if (isFinished) { %>
+            <!-- Finalizado -->
+            <div class="alert mb-0 py-3 d-flex align-items-center gap-2"
+                 style="background:#fff8dc;border-color:#b8860b">
+              <i class="bi bi-flag-fill fs-5" style="color:#b8860b"></i>
+              <div>
+                <div class="fw-semibold" style="color:#7a5c00">Este torneo ha finalizado</div>
+                <% if (userRegistration) { %>
+                <div class="small text-muted mt-1">
+                  Participaste con <strong><%= userRegistration.team_nombre %></strong>
+                </div>
+                <% } %>
+              </div>
+            </div>
+
+            <% } else if (isOpen) { %>
+              <% if (!userRegistration) { %>
+              <!-- No inscrito: mostrar selector de equipo o aviso -->
+              <% if (teamCount >= event.max_equipos) { %>
+                <div class="alert alert-danger py-2 mb-0">
+                  <i class="bi bi-lock-fill me-2"></i>
+                  <strong>Este torneo ya está completo.</strong>
+                  <div class="small mt-1">Se ha alcanzado el máximo de <%= event.max_equipos %> equipos.</div>
+                </div>
+                <button class="btn btn-secondary w-100 mt-2" disabled>
+                  <i class="bi bi-shield-x me-2"></i>Inscripción cerrada
+                </button>
+              <% } else if (userTeams.length === 0) { %>
+                <div class="alert alert-warning mb-0">
+                  <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                  <strong>Necesitas crear un equipo</strong> de tipo
+                  <strong><%= event.tipo %></strong> desde tu perfil antes de inscribirte.
+                  <a href="/perfil#tab-equipos" class="alert-link d-block mt-2">
+                    <i class="bi bi-arrow-right me-1"></i>Ir a mis equipos
+                  </a>
+                </div>
+              <% } else { %>
+                <form action="/eventos/inscribir-equipo" method="POST">
+                  <input type="hidden" name="evento_id" value="<%= event.id %>">
+                  <label class="form-label fw-semibold">Selecciona tu equipo</label>
+                  <select name="team_id" class="form-select mb-3">
+                    <% userTeams.forEach(t => { %>
+                    <option value="<%= t.id %>"><%= t.nombre %></option>
+                    <% }) %>
+                  </select>
+                  <button type="submit" class="btn btn-success w-100 fw-semibold">
+                    <i class="bi bi-shield-plus me-2"></i>Inscribir equipo
+                  </button>
+                </form>
+              <% } %>
+
+              <% } else { %>
+              <!-- Ya inscrito con equipo -->
+              <div class="alert alert-success d-flex align-items-center gap-2 py-2 mb-3">
+                <i class="bi bi-shield-check fs-5"></i>
+                <div>
+                  <div class="small text-muted">Inscrito con el equipo</div>
+                  <div class="fw-bold"><%= userRegistration.team_nombre %></div>
+                </div>
+              </div>
+
+              <!-- Cambiar equipo -->
+              <% if (userTeams.length > 1) { %>
+              <form action="/eventos/inscribir-equipo" method="POST">
+                <input type="hidden" name="evento_id" value="<%= event.id %>">
+                <label class="form-label small fw-semibold text-muted">Cambiar de equipo</label>
+                <select name="team_id" class="form-select form-select-sm mb-2">
+                  <% userTeams.forEach(t => { %>
+                  <option value="<%= t.id %>" <%= userRegistration.team_id == t.id ? 'selected':'' %>>
+                    <%= t.nombre %>
+                  </option>
+                  <% }) %>
+                </select>
+                <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                  <i class="bi bi-arrow-repeat me-1"></i>Cambiar equipo
+                </button>
+              </form>
+              <% } %>
+              <% } %>
+
+            <% } else if (event.estado === 'en_curso') { %>
+            <div class="alert alert-warning py-2 mb-0">
+              <i class="bi bi-play-circle me-1"></i>
+              <small>Evento en curso. Inscripciones cerradas.</small>
+            </div>
+            <% if (userRegistration) { %>
+            <div class="alert alert-success d-flex align-items-center gap-2 py-2 mt-2 mb-0">
+              <i class="bi bi-shield-check fs-5"></i>
+              <div>
+                <div class="small text-muted">Tu equipo</div>
+                <div class="fw-bold"><%= userRegistration.team_nombre %></div>
+              </div>
+            </div>
+            <% } %>
+            <% } %>
+
+            <% } /* end user */ %>
+          </div>
+        </div>
+
+        <!-- Admin: editar evento -->
+        <% if (user && user.role === 'admin') { %>
+        <div class="card border-0 border-danger shadow-sm">
+          <div class="card-header bg-danger bg-opacity-10 border-bottom fw-bold py-2 text-danger">
+            <i class="bi bi-gear me-2"></i>Administración
+          </div>
+          <div class="card-body d-flex gap-2 flex-wrap">
+            <a href="/eventos/<%= event.id %>/editar" class="btn btn-warning btn-sm flex-fill">
+              <i class="bi bi-pencil me-1"></i>Editar
+            </a>
+            <a href="/admin/partidos?evento_id=<%= event.id %>" class="btn btn-outline-primary btn-sm flex-fill">
+              <i class="bi bi-controller me-1"></i>Gestionar partidos
+            </a>
+            <form id="del-event-<%= event.id %>" action="/eventos/<%= event.id %>/eliminar" method="POST">
+              <button type="button" class="btn btn-danger btn-sm"
+                      data-form="del-event-<%= event.id %>"
+                      data-msg="¿Eliminar «<%= event.titulo %>»? Esta acción es irreversible."
+                      onclick="showConfirmModal(this.dataset.msg, this.dataset.form)">
+                <i class="bi bi-trash me-1"></i>Eliminar
+              </button>
+            </form>
+          </div>
+        </div>
+        <% } %>
+
+      </div><!-- /sidebar -->
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

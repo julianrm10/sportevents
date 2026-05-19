@@ -1,0 +1,25 @@
+<% /* title y message son pasados por el controlador */ %>
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<main class="flex-grow-1 d-flex align-items-center">
+  <div class="container text-center py-5">
+    <div class="display-1 text-muted mb-3">⚠️</div>
+    <h1 class="fw-bold mb-2"><%= typeof title !== 'undefined' ? title : 'Error' %></h1>
+    <p class="lead text-muted mb-4">
+      <%= typeof message !== 'undefined' ? message : 'Ha ocurrido un error inesperado.' %>
+    </p>
+    <div class="d-flex gap-2 justify-content-center">
+      <a href="/eventos" class="btn btn-primary">
+        <i class="bi bi-house me-2"></i>Ir a eventos
+      </a>
+      <a href="javascript:history.back()" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+      </a>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
+</body>
+</html>

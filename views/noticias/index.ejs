@@ -1,0 +1,82 @@
+<% const title = 'Noticias deportivas' %>
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<!-- Hero -->
+<div class="container-lg px-3 px-lg-4 mt-3 mb-4">
+  <section class="event-detail-hero position-relative rounded-4 overflow-hidden">
+    <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1600"
+         class="event-hero-img" alt="Noticias deportivas">
+    <div class="event-hero-overlay"></div>
+    <div class="position-absolute top-0 start-0 end-0 bottom-0 d-flex align-items-center justify-content-center text-center text-white px-4"
+         style="z-index:1">
+      <div>
+        <h1 class="display-4 fw-bold mb-3" style="text-shadow:0 2px 8px rgba(0,0,0,.5)">
+          Noticias Deportivas
+        </h1>
+        <p class="lead mb-0" style="opacity:.85">
+          Las últimas noticias del mundo del deporte
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+
+    <% if (!articles.length) { %>
+    <div class="text-center py-5">
+      <div class="display-1 text-muted"><i class="bi bi-newspaper"></i></div>
+      <h3 class="text-muted mt-3">No hay noticias disponibles en este momento</h3>
+      <p class="text-muted">Inténtalo de nuevo más tarde.</p>
+    </div>
+
+    <% } else { %>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      <% articles.forEach(article => {
+           const imgSrc = article.image || 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800';
+           const pubDate = new Date(article.publishedAt).toLocaleString('es-ES', {
+             day: '2-digit', month: 'short', year: 'numeric',
+             hour: '2-digit', minute: '2-digit'
+           });
+      %>
+      <div class="col">
+        <div class="card h-100 event-card shadow-sm border-0">
+          <img src="<%= imgSrc %>" class="card-img-top event-thumb" alt="<%= article.title %>"
+               onerror="this.src='https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800'">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title fw-bold mb-2" style="line-height:1.3">
+              <%= article.title %>
+            </h5>
+            <% if (article.description) { %>
+            <p class="card-text text-muted small mb-3 text-truncate-2"><%= article.description %></p>
+            <% } %>
+            <div class="mt-auto">
+              <ul class="list-unstyled small text-muted mb-3">
+                <li class="mb-1">
+                  <i class="bi bi-building me-1 text-primary"></i>
+                  <%= article.source && article.source.name ? article.source.name : 'Fuente desconocida' %>
+                </li>
+                <li>
+                  <i class="bi bi-calendar3 me-1 text-primary"></i><%= pubDate %>
+                </li>
+              </ul>
+              <a href="<%= article.url %>" target="_blank" rel="noopener noreferrer"
+                 class="btn btn-primary btn-sm w-100">
+                Leer más <i class="bi bi-box-arrow-up-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<% const title = 'Mi perfil' %>
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<%
+const SPORT_ICON   = { futbol:'⚽', baloncesto:'🏀', tenis:'🎾', otros:'🏅' };
+const SPORT_COLOR  = { futbol:'success', baloncesto:'warning', tenis:'info', otros:'secondary' };
+const ESTADO_COLOR = { abierto:'success', en_curso:'warning', finalizado:'secondary' };
+const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Finalizado' };
+%>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+
+    <!-- Cabecera del perfil -->
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+      <div class="profile-header-bg"></div>
+      <div class="card-body pt-0">
+        <div class="d-flex flex-column flex-md-row align-items-center gap-3 align-items-md-end">
+          <div class="profile-avatar">
+            <%= profileUser.nombre.charAt(0).toUpperCase() %>
+          </div>
+          <div class="pb-2">
+            <h2 class="fw-bold mb-0"><%= profileUser.nombre %></h2>
+            <div class="text-muted"><i class="bi bi-envelope me-1"></i><%= profileUser.email %></div>
+            <div class="mt-1">
+              <span class="badge bg-<%= profileUser.role==='admin' ? 'danger' : 'primary' %>">
+                <i class="bi bi-<%= profileUser.role==='admin' ? 'gear-fill' : 'person' %> me-1"></i>
+                <%= profileUser.role === 'admin' ? 'Administrador' : 'Usuario' %>
+              </span>
+              <span class="badge bg-light text-muted border ms-1">
+                Miembro desde <%= new Date(profileUser.created_at).toLocaleDateString('es-ES', {month:'long', year:'numeric'}) %>
+              </span>
+            </div>
+          </div>
+          <div class="ms-md-auto d-flex gap-3 text-center pb-2">
+            <div>
+              <div class="h4 fw-bold mb-0 text-primary"><%= registrations.length %></div>
+              <div class="small text-muted">Inscripciones</div>
+            </div>
+            <div>
+              <div class="h4 fw-bold mb-0 text-warning"><%= favorites.length %></div>
+              <div class="small text-muted">Favoritos</div>
+            </div>
+            <div>
+              <div class="h4 fw-bold mb-0 text-success"><%= teams.length %></div>
+              <div class="small text-muted">Equipos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" id="profileTabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#tab-inscripciones">
+          <i class="bi bi-person-check me-1"></i>
+          Mis inscripciones
+          <span class="badge bg-primary ms-1"><%= registrations.length %></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-favoritos">
+          <i class="bi bi-star me-1"></i>
+          Favoritos
+          <span class="badge bg-warning text-dark ms-1"><%= favorites.length %></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#tab-equipos">
+          <i class="bi bi-shield me-1"></i>
+          Mis equipos
+          <span class="badge bg-success ms-1"><%= teams.length %></span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+
+      <!-- ── TAB: Inscripciones ── -->
+      <div class="tab-pane fade show active" id="tab-inscripciones">
+        <% if (!registrations.length) { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-calendar-x fs-1 d-block mb-3"></i>
+          <h5>Aún no estás inscrito en ningún evento</h5>
+          <a href="/eventos" class="btn btn-primary mt-2">Explorar eventos</a>
+        </div>
+        <% } else { %>
+        <div class="row g-3">
+          <% registrations.forEach(reg => { %>
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body d-flex gap-3">
+                <!-- Miniatura -->
+                <% if (reg.imagen) { %>
+                <img src="/uploads/<%= reg.imagen %>" alt="" class="rounded" style="width:60px;height:60px;object-fit:cover;flex-shrink:0">
+                <% } else { %>
+                <div class="rounded sport-thumb sport-bg-<%= reg.tipo %>" style="width:60px;height:60px;flex-shrink:0">
+                  <%= SPORT_ICON[reg.tipo] %>
+                </div>
+                <% } %>
+                <div class="flex-grow-1 min-w-0">
+                  <div class="d-flex gap-2 mb-1 flex-wrap">
+                    <span class="badge bg-<%= ESTADO_COLOR[reg.estado] %> small">
+                      <%= ESTADO_LABEL[reg.estado] %>
+                    </span>
+                    <span class="badge bg-light text-dark border small">
+                      <%= SPORT_ICON[reg.tipo] %> <%= reg.tipo %>
+                    </span>
+                  </div>
+                  <h6 class="fw-bold mb-1 text-truncate"><%= reg.titulo %></h6>
+                  <div class="small text-muted">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    <%= new Date(reg.fecha).toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'}) %>
+                  </div>
+                  <div class="small mt-1">
+                    <i class="bi bi-shield-check text-success me-1"></i>
+                    Equipo: <strong><%= reg.team_nombre || '—' %></strong>
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  <a href="/eventos/<%= reg.evento_id %>" class="btn btn-sm btn-outline-primary">
+                    Ver
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- ── TAB: Favoritos ── -->
+      <div class="tab-pane fade" id="tab-favoritos">
+        <% if (!favorites.length) { %>
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-star fs-1 d-block mb-3"></i>
+          <h5>Aún no tienes eventos favoritos</h5>
+          <a href="/eventos" class="btn btn-warning mt-2">Explorar eventos</a>
+        </div>
+        <% } else { %>
+        <div class="row g-3">
+          <% favorites.forEach(fav => { %>
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body d-flex gap-3">
+                <% if (fav.imagen) { %>
+                <img src="/uploads/<%= fav.imagen %>" alt="" class="rounded" style="width:60px;height:60px;object-fit:cover;flex-shrink:0">
+                <% } else { %>
+                <div class="rounded sport-thumb sport-bg-<%= fav.tipo %>" style="width:60px;height:60px;flex-shrink:0">
+                  <%= SPORT_ICON[fav.tipo] %>
+                </div>
+                <% } %>
+                <div class="flex-grow-1 min-w-0">
+                  <div class="d-flex gap-2 mb-1">
+                    <span class="badge bg-<%= ESTADO_COLOR[fav.estado] %> small">
+                      <%= ESTADO_LABEL[fav.estado] %>
+                    </span>
+                  </div>
+                  <h6 class="fw-bold mb-1 text-truncate"><%= fav.titulo %></h6>
+                  <div class="small text-muted">
+                    <i class="bi bi-geo-alt me-1"></i><%= fav.lugar %>
+                  </div>
+                  <div class="small text-muted">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    <%= new Date(fav.fecha).toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'}) %>
+                  </div>
+                </div>
+                <div class="flex-shrink-0 d-flex flex-column gap-1">
+                  <a href="/eventos/<%= fav.evento_id %>" class="btn btn-sm btn-outline-primary">Ver</a>
+                  <form action="/eventos/favorito" method="POST">
+                    <input type="hidden" name="evento_id" value="<%= fav.evento_id %>">
+                    <button class="btn btn-sm btn-outline-warning w-100" title="Quitar">
+                      <i class="bi bi-star-fill"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- ── TAB: Equipos ── -->
+      <div class="tab-pane fade" id="tab-equipos">
+        <div class="row g-4">
+
+          <!-- Lista de equipos -->
+          <div class="col-lg-7">
+            <% if (!teams.length) { %>
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-shield-x fs-1 d-block mb-3"></i>
+              <h5>No tienes equipos creados</h5>
+              <p>Crea tu primer equipo para poder inscribirte en torneos en equipo.</p>
+            </div>
+            <% } else { %>
+            <div class="d-flex flex-column gap-3">
+              <% teams.forEach(team => { %>
+              <div class="card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                  <div class="team-avatar sport-bg-<%= team.tipo %>">
+                    <%= SPORT_ICON[team.tipo] %>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="fw-bold mb-0"><%= team.nombre %></h6>
+                    <small class="text-muted text-capitalize"><%= team.tipo %></small>
+                  </div>
+                  <div class="text-muted small me-2">
+                    Creado <%= new Date(team.created_at).toLocaleDateString('es-ES') %>
+                  </div>
+                  <form id="del-team-<%= team.id %>" action="/equipos/<%= team.id %>/eliminar" method="POST">
+                    <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar"
+                            data-form="del-team-<%= team.id %>"
+                            data-msg="¿Eliminar el equipo «<%= team.nombre %>»? Esta acción no se puede deshacer."
+                            onclick="showConfirmModal(this.dataset.msg, this.dataset.form)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <% }) %>
+            </div>
+            <% } %>
+          </div>
+
+          <!-- Formulario crear equipo -->
+          <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-success text-white fw-bold py-3">
+                <i class="bi bi-shield-plus me-2"></i>Crear nuevo equipo
+              </div>
+              <div class="card-body">
+                <form action="/equipos/crear" method="POST">
+                  <div class="mb-3">
+                    <label for="equipo-nombre" class="form-label fw-semibold">Nombre del equipo <span class="text-danger">*</span></label>
+                    <input type="text" id="equipo-nombre" name="nombre" class="form-control"
+                           placeholder="Ej: Los Cracks FC" required minlength="3" maxlength="150">
+                  </div>
+                  <div class="mb-3">
+                    <label for="equipo-tipo" class="form-label fw-semibold">Deporte <span class="text-danger">*</span></label>
+                    <select id="equipo-tipo" name="tipo" class="form-select" required>
+                      <option value="">Selecciona deporte</option>
+                      <option value="futbol">⚽ Fútbol</option>
+                      <option value="baloncesto">🏀 Baloncesto</option>
+                      <option value="tenis">🎾 Tenis</option>
+                      <option value="otros">🏅 Otros</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-success w-100 fw-semibold">
+                    <i class="bi bi-shield-plus me-2"></i>Crear equipo
+                  </button>
+                </form>
+                <div class="form-text text-muted mt-2">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Solo puedes inscribir equipos en eventos del mismo deporte.
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /tab-content -->
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

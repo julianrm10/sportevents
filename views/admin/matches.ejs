@@ -1,0 +1,299 @@
+<% const title = 'Gestionar partidos' %>
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+
+    <div class="mb-4">
+      <a href="/admin" class="text-secondary text-decoration-none small d-inline-flex align-items-center gap-1 mb-2">
+        <i class="bi bi-arrow-left"></i> Volver al dashboard
+      </a>
+      <h2 class="fw-bold mb-0">
+        <i class="bi bi-controller text-primary me-2"></i>Gestionar Partidos
+      </h2>
+    </div>
+
+
+    <!-- Selector de evento -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <form action="/admin/partidos" method="GET">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+            <label for="evento_id" class="form-label fw-semibold mb-0">Selecciona un evento</label>
+            <% if (selectedEvent) { %>
+            <a href="/eventos/<%= selectedEvent.id %>" target="_blank"
+               class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-box-arrow-up-right me-1"></i>Ver evento
+            </a>
+            <% } %>
+          </div>
+          <select id="evento_id" name="evento_id" class="form-select"
+                  onchange="this.form.submit()">
+            <option value="">— Elige un evento —</option>
+            <%
+            const ESTADO_DOT   = { abierto:'🟢', en_curso:'🟡', finalizado:'⚫' };
+            const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Finalizado' };
+            %>
+            <% events.forEach(ev => { %>
+            <option value="<%= ev.id %>"
+                    <%= selectedEvent && selectedEvent.id == ev.id ? 'selected' : '' %>>
+              <%= ev.titulo %> · <%= ESTADO_DOT[ev.estado] %> <%= ESTADO_LABEL[ev.estado] %>
+            </option>
+            <% }) %>
+          </select>
+        </form>
+      </div>
+    </div>
+
+    <% if (selectedEvent) { %>
+    <%
+    const canGenerate   = teamCount >= selectedEvent.min_equipos;
+    const lacking       = selectedEvent.min_equipos - teamCount;
+    const totalPossible = teamCount >= 2 ? (teamCount * (teamCount - 1)) / 2 : 0;
+    const progress      = Math.min(100, Math.round(teamCount / selectedEvent.min_equipos * 100));
+    %>
+
+    <!-- ── Botón generar (siempre visible, desaparece si ya hay partidos) ── -->
+    <% if (matchCount === 0) { %>
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom py-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <h6 class="fw-bold mb-0">
+            <i class="bi bi-arrow-repeat text-primary me-2"></i>
+            Generar partidos automáticamente
+          </h6>
+          <span class="text-muted small">
+            <i class="bi bi-people me-1"></i>
+            <strong class="text-<%= canGenerate ? 'success' : 'warning' %>">
+              <%= teamCount %>
+            </strong> / <%= selectedEvent.min_equipos %> equipos mínimos
+          </span>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="progress mt-3 mb-1" style="height:8px">
+          <div class="progress-bar bg-<%= canGenerate ? 'success' : 'warning' %> transition-width"
+               style="width:<%= progress %>%"></div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <small class="text-muted">0</small>
+          <small class="text-muted fw-semibold"><%= selectedEvent.min_equipos %> necesarios</small>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <% if (!canGenerate) { %>
+        <!-- Faltan equipos -->
+        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
+          <div class="flex-grow-1">
+            <div class="alert alert-warning d-flex align-items-center gap-2 mb-0 py-2">
+              <i class="bi bi-hourglass-split fs-5 flex-shrink-0"></i>
+              <div>
+                Faltan <strong><%= lacking %> equipo<%= lacking !== 1 ? 's' : '' %></strong>
+                para poder iniciar el torneo.
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-secondary flex-shrink-0" disabled>
+            <i class="bi bi-lock me-2"></i>Generar partidos
+          </button>
+        </div>
+
+        <% } else { %>
+        <!-- Listo para generar -->
+        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
+          <div class="flex-grow-1">
+            <div class="alert alert-success d-flex align-items-center gap-2 mb-0 py-2">
+              <i class="bi bi-check-circle-fill fs-5 flex-shrink-0"></i>
+              <div>
+                <strong><%= teamCount %> equipos</strong> inscritos.
+                Se crearán <strong><%= totalPossible %></strong>
+                partido<%= totalPossible !== 1 ? 's' : '' %> (round&#8209;robin).
+                El evento pasará a <strong>"En curso"</strong>.
+              </div>
+            </div>
+          </div>
+          <form id="form-generar-<%= selectedEvent.id %>"
+                action="/admin/eventos/<%= selectedEvent.id %>/generar-partidos" method="POST"
+                class="flex-shrink-0">
+            <button type="button" class="btn btn-success fw-semibold px-4"
+                    data-form="form-generar-<%= selectedEvent.id %>"
+                    data-total="<%= totalPossible %>"
+                    onclick="showConfirmModal(
+                      'Se crearán ' + this.dataset.total + ' partido' + (this.dataset.total != 1 ? 's' : '') + ' (round‑robin) y el evento pasará a estado En curso. Esta acción no se puede deshacer.',
+                      this.dataset.form,
+                      { title: '¿Generar partidos?', titleIcon: 'bi-trophy', titleIconClass: 'text-success', btnText: 'Generar partidos', btnIcon: 'bi-arrow-repeat', btnClass: 'btn-success' }
+                    )">
+              <i class="bi bi-arrow-repeat me-2"></i>Generar partidos
+            </button>
+          </form>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <% } /* matchCount === 0 */ %>
+
+    <!-- ── Finalizar torneo ── -->
+    <% if (selectedEvent.estado === 'en_curso' && matchCount > 0) { %>
+    <%
+    const pendingCount = matches.filter(m => m.estado === 'pendiente').length;
+    const canFinalize  = pendingCount === 0;
+    %>
+    <div class="card border-0 shadow-sm mb-4 border-start border-5 border-warning">
+      <div class="card-body d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
+        <div class="flex-grow-1">
+          <% if (canFinalize) { %>
+          <div class="alert alert-success d-flex align-items-center gap-2 mb-0 py-2">
+            <i class="bi bi-trophy-fill fs-5 flex-shrink-0 text-warning"></i>
+            <div>
+              Todos los partidos han sido jugados.
+              Puedes <strong>finalizar el torneo</strong> y fijar la clasificación definitiva.
+            </div>
+          </div>
+          <% } else { %>
+          <div class="alert alert-warning d-flex align-items-center gap-2 mb-0 py-2">
+            <i class="bi bi-hourglass-split fs-5 flex-shrink-0"></i>
+            <div>
+              Quedan <strong><%= pendingCount %> partido<%= pendingCount !== 1 ? 's' : '' %></strong> pendiente<%= pendingCount !== 1 ? 's' : '' %> por jugar.
+            </div>
+          </div>
+          <% } %>
+        </div>
+        <% if (canFinalize) { %>
+        <form id="form-finalizar-<%= selectedEvent.id %>"
+              action="/admin/eventos/<%= selectedEvent.id %>/finalizar" method="POST"
+              class="flex-shrink-0">
+          <button type="button" class="btn btn-warning fw-semibold px-4"
+                  data-form="form-finalizar-<%= selectedEvent.id %>"
+                  data-msg="¿Finalizar el torneo? Esta acción cerrará el evento y mostrará la clasificación final."
+                  onclick="showConfirmModal(this.dataset.msg, this.dataset.form)">
+            <i class="bi bi-flag-fill me-2"></i>Finalizar torneo
+          </button>
+        </form>
+        <% } else { %>
+        <button class="btn btn-secondary flex-shrink-0" disabled
+                title="Quedan partidos por jugar">
+          <i class="bi bi-lock me-2"></i>Finalizar torneo
+        </button>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- ── Lista de partidos ── -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-bottom fw-bold py-3 d-flex align-items-center gap-2">
+        <i class="bi bi-list-ul text-primary"></i>
+        Partidos · <span class="text-muted fw-normal small"><%= selectedEvent.titulo %></span>
+        <span class="badge bg-primary rounded-pill ms-auto"><%= matches.length %></span>
+      </div>
+
+      <% if (!matches.length) { %>
+      <div class="card-body text-center py-5 text-muted">
+        <i class="bi bi-calendar-x fs-1 d-block mb-3"></i>
+        <p class="mb-0">No hay partidos todavía.</p>
+        <% if (canGenerate) { %>
+        <small>Usa el botón de arriba para generarlos automáticamente.</small>
+        <% } else if (selectedEvent) { %>
+        <small>Necesitas al menos <strong><%= selectedEvent.min_equipos %></strong> equipos inscritos.</small>
+        <% } %>
+      </div>
+
+      <% } else { %>
+      <div class="list-group list-group-flush">
+        <% matches.forEach((m, idx) => { %>
+        <div class="list-group-item py-3">
+
+          <!-- Cabecera del partido -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted fw-semibold">Partido <%= idx + 1 %></small>
+            <% if (m.fecha) { %>
+            <small class="text-muted">
+              <i class="bi bi-calendar3 me-1"></i>
+              <%= new Date(m.fecha).toLocaleString('es-ES', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) %>
+            </small>
+            <% } %>
+            <span class="badge rounded-pill
+                         bg-<%= m.estado === 'jugado' ? 'success' : 'warning text-dark' %>">
+              <%= m.estado === 'jugado' ? 'Jugado' : 'Pendiente' %>
+            </span>
+          </div>
+
+          <!-- Marcador actual -->
+          <div class="d-flex align-items-center justify-content-between mb-3 px-1">
+            <span class="fw-bold
+              <%= m.estado === 'jugado' && m.goles_team1 > m.goles_team2 ? 'text-success' : '' %>">
+              <%= m.team1_nombre %>
+            </span>
+            <span class="badge bg-dark fs-5 px-3 py-2 mx-2 font-monospace">
+              <% if (m.estado === 'jugado') { %>
+                <%= m.goles_team1 %>&nbsp;–&nbsp;<%= m.goles_team2 %>
+              <% } else { %>
+                vs
+              <% } %>
+            </span>
+            <span class="fw-bold text-end
+              <%= m.estado === 'jugado' && m.goles_team2 > m.goles_team1 ? 'text-success' : '' %>">
+              <%= m.team2_nombre %>
+            </span>
+          </div>
+
+          <!-- Formulario de actualización -->
+          <form action="/admin/partidos/<%= m.id %>/actualizar" method="POST"
+                class="border rounded-2 p-3 bg-light">
+            <input type="hidden" name="evento_id" value="<%= selectedEvent.id %>">
+            <div class="row g-2 align-items-end">
+              <div class="col-3">
+                <label class="form-label small fw-semibold text-truncate d-block"
+                       title="<%= m.team1_nombre %>">
+                  <%= m.team1_nombre.split(' ')[0] %>
+                </label>
+                <input type="number" name="goles_team1"
+                       class="form-control form-control-sm text-center fw-bold"
+                       value="<%= m.goles_team1 %>" min="0" max="999" required>
+              </div>
+              <div class="col-3">
+                <label class="form-label small fw-semibold text-truncate d-block"
+                       title="<%= m.team2_nombre %>">
+                  <%= m.team2_nombre.split(' ')[0] %>
+                </label>
+                <input type="number" name="goles_team2"
+                       class="form-control form-control-sm text-center fw-bold"
+                       value="<%= m.goles_team2 %>" min="0" max="999" required>
+              </div>
+              <div class="col-3">
+                <label class="form-label small fw-semibold">Estado</label>
+                <select name="estado" class="form-select form-select-sm">
+                  <option value="pendiente" <%= m.estado === 'pendiente' ? 'selected' : '' %>>Pendiente</option>
+                  <option value="jugado"    <%= m.estado === 'jugado'    ? 'selected' : '' %>>Jugado</option>
+                </select>
+              </div>
+              <div class="col-3">
+                <label class="form-label small fw-semibold">Fecha</label>
+                <input type="datetime-local" name="fecha"
+                       class="form-control form-control-sm"
+                       value="<%= m.fecha ? new Date(m.fecha).toISOString().slice(0,16) : '' %>">
+              </div>
+              <div class="col-12 mt-2">
+                <button type="submit" class="btn btn-success btn-sm w-100">
+                  <i class="bi bi-check2 me-1"></i>Guardar
+                </button>
+              </div>
+            </div>
+          </form>
+
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+
+    <% } /* selectedEvent */ %>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

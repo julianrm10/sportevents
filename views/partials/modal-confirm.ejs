@@ -1,0 +1,46 @@
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="confirmModalTitle">
+          <i class="bi bi-exclamation-triangle-fill text-danger me-2" id="confirmModalIcon"></i>
+          <span id="confirmModalTitleText">¿Estás seguro?</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body py-3">
+        <p id="confirmModalMessage" class="mb-0 text-muted"></p>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger fw-semibold" id="confirmModalBtn">
+          <i class="bi bi-trash me-1" id="confirmModalBtnIcon"></i>
+          <span id="confirmModalBtnText">Eliminar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function showConfirmModal(message, formId, opts) {
+    var o = opts || {};
+    document.getElementById('confirmModalMessage').textContent = message;
+    document.getElementById('confirmModalTitleText').textContent = o.title    || '¿Estás seguro?';
+    document.getElementById('confirmModalBtnText').textContent   = o.btnText  || 'Eliminar';
+
+    var icon    = document.getElementById('confirmModalIcon');
+    icon.className = 'bi ' + (o.titleIcon || 'bi-exclamation-triangle-fill') + ' me-2 ' + (o.titleIconClass || 'text-danger');
+
+    var btnIcon = document.getElementById('confirmModalBtnIcon');
+    btnIcon.className = 'bi ' + (o.btnIcon || 'bi-trash') + ' me-1';
+
+    var btn = document.getElementById('confirmModalBtn');
+    btn.className = 'btn fw-semibold ' + (o.btnClass || 'btn-danger');
+
+    btn.onclick = function () {
+      bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+      document.getElementById(formId).submit();
+    };
+    new bootstrap.Modal(document.getElementById('confirmModal')).show();
+  }
+</script>

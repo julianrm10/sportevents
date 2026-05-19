@@ -1,0 +1,140 @@
+<% const title = 'Gestionar eventos' %>
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<%
+const SPORT_ICON   = { futbol:'⚽', baloncesto:'🏀', tenis:'🎾', otros:'🏅' };
+const ESTADO_COLOR = { abierto:'success', en_curso:'warning', finalizado:'secondary' };
+const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Finalizado' };
+%>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div>
+        <a href="/admin" class="text-secondary text-decoration-none small d-inline-flex align-items-center gap-1 mb-2">
+          <i class="bi bi-arrow-left"></i> Volver al dashboard
+        </a>
+        <h2 class="fw-bold mb-0"><i class="bi bi-calendar3 text-primary me-2"></i>Gestionar Eventos</h2>
+      </div>
+      <a href="/eventos/crear" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Crear evento
+      </a>
+    </div>
+
+
+    <!-- Filtro por estado -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body py-2 d-flex align-items-center gap-3">
+        <span class="fw-semibold text-muted small">Filtrar por estado:</span>
+        <select class="form-select form-select-sm w-auto"
+                onchange="window.location='/admin/eventos' + (this.value ? '?estado=' + this.value : '')">
+          <option value="" <%= !selectedEstado ? 'selected' : '' %>>Todos</option>
+          <option value="abierto"    <%= selectedEstado==='abierto'    ? 'selected' : '' %>>Abierto</option>
+          <option value="en_curso"   <%= selectedEstado==='en_curso'   ? 'selected' : '' %>>En curso</option>
+          <option value="finalizado" <%= selectedEstado==='finalizado' ? 'selected' : '' %>>Finalizado</option>
+        </select>
+        <% if (selectedEstado) { %>
+        <a href="/admin/eventos" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-x-circle me-1"></i>Limpiar filtro
+        </a>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Evento</th>
+              <th>Tipo</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th class="text-center">Equipos</th>
+              <th class="text-center">Jugados</th>
+              <th class="text-center">Pendientes</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!events.length) { %>
+            <tr>
+              <td colspan="9" class="text-center py-4 text-muted">
+                <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                No hay eventos creados todavía.
+                <a href="/eventos/crear">Crea el primero</a>
+              </td>
+            </tr>
+            <% } %>
+            <% events.forEach(ev => { %>
+            <tr>
+              <td class="text-muted small"><%= ev.id %></td>
+              <td>
+                <div class="fw-semibold"><%= ev.titulo %></div>
+                <small class="text-muted"><i class="bi bi-geo-alt me-1"></i><%= ev.lugar %></small>
+              </td>
+              <td><%= SPORT_ICON[ev.tipo] %> <%= ev.tipo %></td>
+              <td class="small">
+                <%= new Date(ev.fecha).toLocaleString('es-ES', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) %>
+              </td>
+              <td>
+                <span class="badge bg-<%= ESTADO_COLOR[ev.estado] %>">
+                  <%= ESTADO_LABEL[ev.estado] %>
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-light text-dark border">
+                  <%= ev.reg_count %> / <%= ev.max_equipos %>
+                </span>
+              </td>
+              <td class="text-center">
+                <% if (ev.played_matches > 0) { %>
+                <span class="badge bg-success"><%= ev.played_matches %></span>
+                <% } else { %>
+                <span class="text-muted small">—</span>
+                <% } %>
+              </td>
+              <td class="text-center">
+                <% if (ev.pending_matches > 0) { %>
+                <span class="badge bg-warning text-dark"><%= ev.pending_matches %></span>
+                <% } else { %>
+                <span class="text-muted small">—</span>
+                <% } %>
+              </td>
+              <td class="text-center">
+                <div class="d-flex gap-1 justify-content-center">
+                  <a href="/eventos/<%= ev.id %>" class="btn btn-sm btn-outline-secondary" title="Ver">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a href="/eventos/<%= ev.id %>/editar" class="btn btn-sm btn-outline-warning" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a href="/admin/partidos?evento_id=<%= ev.id %>" class="btn btn-sm btn-outline-primary" title="Partidos">
+                    <i class="bi bi-controller"></i>
+                  </a>
+                  <form id="del-ev-<%= ev.id %>" action="/eventos/<%= ev.id %>/eliminar" method="POST">
+                    <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar"
+                            data-form="del-ev-<%= ev.id %>"
+                            data-msg="¿Eliminar «<%= ev.titulo %>»? Esta acción no se puede deshacer."
+                            onclick="showConfirmModal(this.dataset.msg, this.dataset.form)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<% const title = event ? 'Editar evento' : 'Crear evento' %>
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<main class="flex-grow-1">
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/eventos">Eventos</a></li>
+            <% if (event) { %>
+            <li class="breadcrumb-item"><a href="/eventos/<%= event.id %>"><%= event.titulo %></a></li>
+            <% } %>
+            <li class="breadcrumb-item active"><%= event ? 'Editar' : 'Crear evento' %></li>
+          </ol>
+        </nav>
+
+        <div class="card border-0 shadow">
+          <div class="card-header bg-primary text-white py-3">
+            <h4 class="mb-0 fw-bold">
+              <i class="bi bi-<%= event ? 'pencil-square' : 'plus-circle' %> me-2"></i>
+              <%= event ? 'Editar evento' : 'Crear nuevo evento' %>
+            </h4>
+          </div>
+
+          <div class="card-body p-4">
+            <form id="eventoForm"
+                  action="<%= event ? '/eventos/'+event.id+'/editar' : '/eventos/crear' %>"
+                  method="POST" enctype="multipart/form-data" novalidate>
+
+              <div class="row g-3">
+
+                <!-- Título -->
+                <div class="col-12">
+                  <label for="titulo" class="form-label fw-semibold">Título del evento <span class="text-danger">*</span></label>
+                  <input type="text" id="titulo" name="titulo" class="form-control"
+                         value="<%= event ? event.titulo : '' %>"
+                         placeholder="Ej: Torneo de Fútbol Primavera 2024"
+                         required minlength="5" maxlength="200">
+                  <div class="invalid-feedback">El título es obligatorio y debe tener al menos 5 caracteres.</div>
+                </div>
+
+                <!-- Tipo + Fecha -->
+                <div class="col-md-6">
+                  <label for="tipo" class="form-label fw-semibold">Tipo de deporte <span class="text-danger">*</span></label>
+                  <select id="tipo" name="tipo" class="form-select" required>
+                    <option value="">Selecciona un deporte</option>
+                    <% ['futbol','baloncesto','tenis','otros'].forEach(t => { %>
+                    <option value="<%= t %>" <%= event && event.tipo===t ? 'selected':'' %>>
+                      <%= {futbol:'⚽ Fútbol', baloncesto:'🏀 Baloncesto', tenis:'🎾 Tenis', otros:'🏅 Otros'}[t] %>
+                    </option>
+                    <% }) %>
+                  </select>
+                  <div class="invalid-feedback">Selecciona un tipo de deporte.</div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="fecha" class="form-label fw-semibold">Fecha y hora <span class="text-danger">*</span></label>
+                  <input type="datetime-local" id="fecha" name="fecha" class="form-control"
+                         required value="<%= event ? new Date(event.fecha).toISOString().slice(0,16) : '' %>">
+                  <div class="invalid-feedback">Introduce una fecha y hora válidas.</div>
+                </div>
+
+                <!-- Lugar -->
+                <div class="col-12">
+                  <label for="lugar" class="form-label fw-semibold">Lugar / Dirección <span class="text-danger">*</span></label>
+                  <input type="text" id="lugar" name="lugar" class="form-control"
+                         value="<%= event ? event.lugar : '' %>"
+                         placeholder="Ej: Polideportivo Municipal, Calle Mayor 1" required>
+                  <div class="invalid-feedback">El lugar es obligatorio.</div>
+                </div>
+
+                <!-- Min y Max equipos -->
+                <div class="col-md-6">
+                  <label for="min_equipos" class="form-label fw-semibold">
+                    Mínimo de equipos para iniciar <span class="text-danger">*</span>
+                  </label>
+                  <input type="number" id="min_equipos" name="min_equipos"
+                         class="form-control" min="2" max="64" required
+                         value="<%= event ? event.min_equipos : 2 %>">
+                  <div class="invalid-feedback">Introduce un valor mínimo de 2.</div>
+                  <div class="form-text">Equipos inscritos necesarios para generar el torneo</div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="max_equipos" class="form-label fw-semibold">
+                    Máx. equipos <span class="text-danger">*</span>
+                  </label>
+                  <input type="number" id="max_equipos" name="max_equipos"
+                         class="form-control" min="2" max="1000" required
+                         value="<%= event ? event.max_equipos : 20 %>">
+                  <div class="invalid-feedback" id="max_equipos_feedback">
+                    El máximo debe ser mayor o igual al mínimo de equipos.
+                  </div>
+                </div>
+
+                <% if (event) { %>
+                <div class="col-md-6">
+                  <label for="estado" class="form-label fw-semibold">Estado</label>
+                  <select id="estado" name="estado" class="form-select">
+                    <option value="abierto"    <%= event.estado==='abierto'    ? 'selected':'' %>>✅ Abierto</option>
+                    <option value="en_curso"   <%= event.estado==='en_curso'   ? 'selected':'' %>>▶️ En curso</option>
+                    <option value="finalizado" <%= event.estado==='finalizado' ? 'selected':'' %>>🏁 Finalizado</option>
+                  </select>
+                </div>
+                <% } %>
+
+                <!-- Descripción -->
+                <div class="col-12">
+                  <label for="descripcion" class="form-label fw-semibold">Descripción <span class="text-danger">*</span></label>
+                  <textarea id="descripcion" name="descripcion" class="form-control"
+                            rows="4" placeholder="Describe el evento, reglas, requisitos..."
+                            required minlength="10" maxlength="2000"><%= event ? event.descripcion : '' %></textarea>
+                  <div class="invalid-feedback">La descripción es obligatoria y debe tener al menos 10 caracteres.</div>
+                </div>
+
+                <!-- Imagen -->
+                <div class="col-12">
+                  <label for="imagen" class="form-label fw-semibold">
+                    Imagen del evento <span class="text-muted">(opcional, máx. 5 MB)</span>
+                  </label>
+                  <% if (event && event.imagen) { %>
+                  <div class="mb-2">
+                    <img src="/uploads/<%= event.imagen %>" alt="Imagen actual"
+                         class="img-thumbnail" style="max-height:120px">
+                    <div class="form-text">Imagen actual. Sube una nueva para reemplazarla.</div>
+                  </div>
+                  <% } %>
+                  <input type="file" id="imagen" name="imagen" class="form-control"
+                         accept="image/jpeg,image/png,image/gif,image/webp">
+                  <div class="form-text">Formatos aceptados: JPG, PNG, GIF, WebP</div>
+                </div>
+
+              </div><!-- /row -->
+
+              <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                  <i class="bi bi-check-lg me-2"></i>
+                  <%= event ? 'Guardar cambios' : 'Crear evento' %>
+                </button>
+                <a href="<%= event ? '/eventos/'+event.id : '/eventos' %>"
+                   class="btn btn-outline-secondary px-4">Cancelar</a>
+              </div>
+
+            </form>
+            <script>
+              (function () {
+                var form = document.getElementById('eventoForm');
+                var maxEl = document.getElementById('max_equipos');
+                var minEl = document.getElementById('min_equipos');
+
+                function validateMaxMin() {
+                  var min = parseInt(minEl.value, 10);
+                  var max = parseInt(maxEl.value, 10);
+                  if (!isNaN(min) && !isNaN(max) && max < min) {
+                    maxEl.setCustomValidity('El máximo debe ser mayor o igual al mínimo.');
+                  } else {
+                    maxEl.setCustomValidity('');
+                  }
+                }
+
+                form.addEventListener('submit', function (e) {
+                  validateMaxMin();
+                  if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                  form.classList.add('was-validated');
+                });
+
+                maxEl.addEventListener('input', function () {
+                  validateMaxMin();
+                  if (form.classList.contains('was-validated')) {
+                    validateMaxMin();
+                  }
+                });
+                minEl.addEventListener('input', function () {
+                  validateMaxMin();
+                });
+              })();
+            </script>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

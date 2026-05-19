@@ -1,0 +1,42 @@
+<%
+const MSG_SUCCESS = {
+  registered:      '✅ Te has inscrito correctamente en el evento.',
+  unregistered:    'ℹ️ Te has desinscrito del evento.',
+  team_registered: '✅ Tu equipo ha sido inscrito en el evento.',
+  updated:         '✅ Evento actualizado correctamente.',
+  created:         '✅ Evento creado correctamente.',
+  deleted:         '✅ Eliminado correctamente.',
+  team_created:    '✅ Equipo creado correctamente.',
+  team_deleted:    'ℹ️ Equipo eliminado.',
+  generated:       '✅ Partidos round-robin generados. El evento ha pasado a "En curso".',
+};
+const MSG_ERROR = {
+  not_open:          '⚠️ Este evento no está abierto para inscripciones.',
+  full:              '⚠️ El evento ha alcanzado el número máximo de participantes.',
+  already:           'ℹ️ Ya estás inscrito en este evento.',
+  team_not_found:    '⚠️ Equipo no encontrado o no te pertenece.',
+  type_mismatch:     '⚠️ El tipo de deporte del equipo no coincide con el del evento.',
+  same_team:         '⚠️ No puedes enfrentar un equipo contra sí mismo.',
+  server:            '❌ Error del servidor. Inténtalo de nuevo.',
+  missing_fields:    '⚠️ Rellena todos los campos requeridos.',
+  team_failed:       '❌ No se pudo completar la operación con el equipo.',
+  create_failed:     '❌ No se pudo crear el partido.',
+  update_failed:     '❌ No se pudo actualizar el partido.',
+  delete_failed:     '❌ No se pudo eliminar.',
+  already_generated: '⚠️ Los partidos ya fueron generados para este evento.',
+  not_enough_teams:  '⚠️ No hay suficientes equipos inscritos para generar los partidos.',
+  not_found:         '⚠️ Evento no encontrado.',
+};
+%>
+<% if (typeof success !== 'undefined' && success) { %>
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  <%= MSG_SUCCESS[success] || success %>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<% } %>
+<% if (typeof error !== 'undefined' && error) { %>
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+  <%= MSG_ERROR[error] || error %>
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<% } %>
