@@ -28,7 +28,7 @@ const ESTADO_LABEL= { abierto:'Abierto', en_curso:'En curso', finalizado:'Finali
         <a href="/eventos/crear" class="btn btn-light btn-lg fw-semibold text-dark">
           <i class="bi bi-plus-circle me-2"></i>Crear evento
         </a>
-        <% } else { %>
+        <% } else if (!user) { %>
         <a href="/auth/register" class="btn btn-light btn-lg fw-semibold text-dark">
           <i class="bi bi-trophy me-2"></i>Regístrate para competir
         </a>
