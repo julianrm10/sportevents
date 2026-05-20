@@ -25,9 +25,27 @@ async function deleteTeam(req, res) {
   const { id }     = req.params;
   const creator_id = req.user.id;
   try {
-    await db.query(
-      'DELETE FROM teams WHERE id = ? AND creator_id = ?', [id, creator_id]
+    const [[team]] = await db.query(
+      'SELECT id FROM teams WHERE id = ? AND creator_id = ?', [id, creator_id]
     );
+    if (!team) {
+      req.flash('error', 'Equipo no encontrado.');
+      return res.redirect('/perfil#tab-equipos');
+    }
+
+    const [[{ enCurso }]] = await db.query(
+      `SELECT COUNT(*) AS enCurso
+       FROM registrations r
+       JOIN events e ON r.evento_id = e.id
+       WHERE r.team_id = ? AND e.estado = 'en_curso'`,
+      [id]
+    );
+    if (enCurso > 0) {
+      req.flash('error', 'No puedes eliminar este equipo mientras está participando en un torneo en curso.');
+      return res.redirect('/perfil#tab-equipos');
+    }
+
+    await db.query('DELETE FROM teams WHERE id = ? AND creator_id = ?', [id, creator_id]);
     req.flash('success', 'Equipo eliminado correctamente.');
     res.redirect('/perfil#tab-equipos');
   } catch (err) {

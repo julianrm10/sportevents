@@ -26,7 +26,16 @@ async function showProfile(req, res) {
     );
 
     const [teams] = await db.query(
-      'SELECT * FROM teams WHERE creator_id = ? ORDER BY created_at DESC', [user_id]
+      `SELECT t.*,
+              EXISTS(
+                SELECT 1 FROM registrations r
+                JOIN events e ON r.evento_id = e.id
+                WHERE r.team_id = t.id AND e.estado = 'en_curso'
+              ) AS en_curso_activo
+       FROM teams t
+       WHERE t.creator_id = ?
+       ORDER BY t.created_at DESC`,
+      [user_id]
     );
 
     res.render('perfil/index', {

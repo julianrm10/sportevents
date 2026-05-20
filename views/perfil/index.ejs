@@ -214,6 +214,16 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
                   <div class="text-muted small me-2">
                     Creado <%= new Date(team.created_at).toLocaleDateString('es-ES') %>
                   </div>
+                  <% if (team.en_curso_activo) { %>
+                  <span class="d-inline-block" tabindex="0"
+                        data-bs-toggle="tooltip"
+                        data-bs-title="No puedes eliminar un equipo con un torneo en curso">
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                            disabled style="pointer-events:none;">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </span>
+                  <% } else { %>
                   <form id="del-team-<%= team.id %>" action="/equipos/<%= team.id %>/eliminar" method="POST">
                     <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar"
                             data-form="del-team-<%= team.id %>"
@@ -222,6 +232,7 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
                       <i class="bi bi-trash"></i>
                     </button>
                   </form>
+                  <% } %>
                 </div>
               </div>
               <% }) %>

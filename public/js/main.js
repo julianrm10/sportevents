@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Inicializar tooltips de Bootstrap
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+    new bootstrap.Tooltip(el);
+  });
+
   // Preview de imagen al seleccionar archivo
   const imgInput = document.getElementById('imagen');
   if (imgInput) {
