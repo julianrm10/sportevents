@@ -45,6 +45,8 @@ async function deleteTeam(req, res) {
       return res.redirect('/perfil#tab-equipos');
     }
 
+    // Borrado explícito como seguro adicional al ON DELETE CASCADE de la FK
+    await db.query('DELETE FROM registrations WHERE team_id = ?', [id]);
     await db.query('DELETE FROM teams WHERE id = ? AND creator_id = ?', [id, creator_id]);
     req.flash('success', 'Equipo eliminado correctamente.');
     res.redirect('/perfil#tab-equipos');

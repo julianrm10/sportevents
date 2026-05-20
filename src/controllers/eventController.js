@@ -74,7 +74,7 @@ async function eventDetail(req, res) {
       const [regs] = await db.query(
         `SELECT r.*, t.nombre AS team_nombre
          FROM registrations r
-         LEFT JOIN teams t ON r.team_id = t.id
+         JOIN teams t ON r.team_id = t.id
          WHERE r.user_id = ? AND r.evento_id = ?`,
         [req.user.id, id]
       );

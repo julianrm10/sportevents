@@ -11,8 +11,8 @@ async function showProfile(req, res) {
       `SELECT r.*, e.titulo, e.tipo, e.fecha, e.estado, e.lugar, e.imagen,
               t.nombre AS team_nombre
        FROM registrations r
-       JOIN  events e ON r.evento_id = e.id
-       LEFT JOIN teams t ON r.team_id = t.id
+       JOIN events e ON r.evento_id = e.id
+       JOIN teams  t ON r.team_id  = t.id
        WHERE r.user_id = ?
        ORDER BY e.fecha DESC`, [user_id]
     );
