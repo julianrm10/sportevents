@@ -1,6 +1,6 @@
-const db     = require('../db/connection');
-const bcrypt = require('bcrypt');
-const jwt    = require('jsonwebtoken');
+const bcrypt    = require('bcrypt');
+const jwt       = require('jsonwebtoken');
+const UserModel = require('../models/user.model');
 
 const COOKIE_OPTS = {
   httpOnly: true,
@@ -21,7 +21,7 @@ function showRegister(req, res) {
 async function login(req, res) {
   const { email, password } = req.body;
   try {
-    const [rows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await UserModel.findByEmail(email);
     if (!rows.length) {
       req.flash('error', 'Email o contraseña incorrectos.');
       return res.redirect('/auth/login');
@@ -66,13 +66,13 @@ async function register(req, res) {
     return res.redirect('/auth/register');
   }
   try {
-    const [existing] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
+    const [existing] = await UserModel.emailExists(email);
     if (existing.length) {
       req.flash('error', 'Este email ya está registrado.');
       return res.redirect('/auth/register');
     }
     const hash = await bcrypt.hash(password, 10);
-    await db.query('INSERT INTO users (nombre, email, password) VALUES (?, ?, ?)', [nombre, email, hash]);
+    await UserModel.create(nombre, email, hash);
     req.flash('success', '¡Bienvenido a SportEvents! Ya puedes iniciar sesión.');
     res.redirect('/auth/login');
   } catch (err) {

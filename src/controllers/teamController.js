@@ -1,4 +1,5 @@
-const db = require('../db/connection');
+const TeamModel         = require('../models/team.model');
+const RegistrationModel = require('../models/registration.model');
 
 async function createTeam(req, res) {
   const { nombre, tipo } = req.body;
@@ -8,10 +9,7 @@ async function createTeam(req, res) {
     return res.redirect('/perfil');
   }
   try {
-    await db.query(
-      'INSERT INTO teams (nombre, tipo, creator_id) VALUES (?, ?, ?)',
-      [nombre.trim(), tipo, creator_id]
-    );
+    await TeamModel.create(nombre.trim(), tipo, creator_id);
     req.flash('success', 'Equipo creado correctamente.');
     res.redirect('/perfil#tab-equipos');
   } catch (err) {
@@ -25,29 +23,20 @@ async function deleteTeam(req, res) {
   const { id }     = req.params;
   const creator_id = req.user.id;
   try {
-    const [[team]] = await db.query(
-      'SELECT id FROM teams WHERE id = ? AND creator_id = ?', [id, creator_id]
-    );
+    const [[team]] = await TeamModel.findByIdAndOwner(id, creator_id);
     if (!team) {
       req.flash('error', 'Equipo no encontrado.');
       return res.redirect('/perfil#tab-equipos');
     }
 
-    const [[{ enCurso }]] = await db.query(
-      `SELECT COUNT(*) AS enCurso
-       FROM registrations r
-       JOIN events e ON r.evento_id = e.id
-       WHERE r.team_id = ? AND e.estado = 'en_curso'`,
-      [id]
-    );
+    const [[{ enCurso }]] = await RegistrationModel.countActiveByTeam(id);
     if (enCurso > 0) {
       req.flash('error', 'No puedes eliminar este equipo mientras está participando en un torneo en curso.');
       return res.redirect('/perfil#tab-equipos');
     }
 
-    // Borrado explícito como seguro adicional al ON DELETE CASCADE de la FK
-    await db.query('DELETE FROM registrations WHERE team_id = ?', [id]);
-    await db.query('DELETE FROM teams WHERE id = ? AND creator_id = ?', [id, creator_id]);
+    await RegistrationModel.removeByTeam(id);
+    await TeamModel.remove(id, creator_id);
     req.flash('success', 'Equipo eliminado correctamente.');
     res.redirect('/perfil#tab-equipos');
   } catch (err) {

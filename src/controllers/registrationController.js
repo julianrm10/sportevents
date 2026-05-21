@@ -1,20 +1,18 @@
-const db = require('../db/connection');
+const EventModel        = require('../models/event.model');
+const TeamModel         = require('../models/team.model');
+const RegistrationModel = require('../models/registration.model');
 
 async function registerTeam(req, res) {
   const { evento_id, team_id } = req.body;
   const user_id = req.user.id;
   try {
-    const [evRows] = await db.query(
-      "SELECT * FROM events WHERE id = ? AND estado = 'abierto'", [evento_id]
-    );
+    const [evRows] = await EventModel.findOpenById(evento_id);
     if (!evRows.length) {
       req.flash('error', 'Este evento no está abierto para inscripciones.');
       return res.redirect(`/eventos/${evento_id}`);
     }
 
-    const [teamRows] = await db.query(
-      'SELECT * FROM teams WHERE id = ? AND creator_id = ?', [team_id, user_id]
-    );
+    const [teamRows] = await TeamModel.findByIdAndOwnerFull(team_id, user_id);
     if (!teamRows.length) {
       req.flash('error', 'Equipo no encontrado o no te pertenece.');
       return res.redirect(`/eventos/${evento_id}`);
@@ -25,27 +23,16 @@ async function registerTeam(req, res) {
       return res.redirect(`/eventos/${evento_id}`);
     }
 
-    const [regs] = await db.query(
-      'SELECT id FROM registrations WHERE user_id = ? AND evento_id = ?', [user_id, evento_id]
-    );
-
+    const [regs] = await RegistrationModel.findByUserAndEvent(user_id, evento_id);
     if (regs.length) {
-      await db.query(
-        'UPDATE registrations SET team_id = ? WHERE user_id = ? AND evento_id = ?',
-        [team_id, user_id, evento_id]
-      );
+      await RegistrationModel.updateTeam(team_id, user_id, evento_id);
     } else {
-      const [[{ teamCount }]] = await db.query(
-        'SELECT COUNT(DISTINCT team_id) AS teamCount FROM registrations WHERE evento_id = ?', [evento_id]
-      );
+      const [[{ teamCount }]] = await RegistrationModel.countTeamsByEvent(evento_id);
       if (teamCount >= evRows[0].max_equipos) {
         req.flash('error', 'Este torneo ya está completo.');
         return res.redirect(`/eventos/${evento_id}`);
       }
-      await db.query(
-        'INSERT INTO registrations (user_id, evento_id, team_id) VALUES (?, ?, ?)',
-        [user_id, evento_id, team_id]
-      );
+      await RegistrationModel.create(user_id, evento_id, team_id);
     }
     req.flash('success', 'Equipo inscrito correctamente.');
     res.redirect(`/eventos/${evento_id}`);

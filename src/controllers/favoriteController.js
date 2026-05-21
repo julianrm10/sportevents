@@ -1,17 +1,15 @@
-const db = require('../db/connection');
+const FavoriteModel = require('../models/favorite.model');
 
 async function toggleFavorite(req, res) {
   const { evento_id } = req.body;
   const user_id = req.user.id;
   try {
-    const [existing] = await db.query(
-      'SELECT id FROM favorites WHERE user_id = ? AND evento_id = ?', [user_id, evento_id]
-    );
+    const [existing] = await FavoriteModel.findByUserAndEvent(user_id, evento_id);
     if (existing.length) {
-      await db.query('DELETE FROM favorites WHERE user_id = ? AND evento_id = ?', [user_id, evento_id]);
+      await FavoriteModel.remove(user_id, evento_id);
       req.flash('success', 'Evento eliminado de favoritos.');
     } else {
-      await db.query('INSERT INTO favorites (user_id, evento_id) VALUES (?, ?)', [user_id, evento_id]);
+      await FavoriteModel.create(user_id, evento_id);
       req.flash('success', 'Evento añadido a favoritos.');
     }
     res.redirect(`/eventos/${evento_id}`);

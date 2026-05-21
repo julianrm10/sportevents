@@ -1,6 +1,10 @@
-const db   = require('../db/connection');
-const fs   = require('fs');
-const path = require('path');
+const fs                = require('fs');
+const path              = require('path');
+const EventModel        = require('../models/event.model');
+const TeamModel         = require('../models/team.model');
+const RegistrationModel = require('../models/registration.model');
+const FavoriteModel     = require('../models/favorite.model');
+const MatchModel        = require('../models/match.model');
 
 // ── Listado de eventos ────────────────────────────────────────
 async function listEvents(req, res) {
@@ -13,13 +17,7 @@ async function listEvents(req, res) {
     if (tipo   && validTipos.includes(tipo))     { conditions.push('e.tipo = ?');   params.push(tipo); }
     if (estado && validEstados.includes(estado)) { conditions.push('e.estado = ?'); params.push(estado); }
 
-    let sql = `SELECT e.*, u.nombre AS creator_nombre,
-                 (SELECT COUNT(*) FROM registrations r WHERE r.evento_id = e.id) AS reg_count
-               FROM events e JOIN users u ON e.creator_id = u.id`;
-    if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
-    sql += ' ORDER BY e.fecha ASC';
-
-    const [events] = await db.query(sql, params);
+    const [events] = await EventModel.findAll(conditions, params);
     res.render('eventos/index', {
       events,
       tipo:   validTipos.includes(tipo)     ? tipo   : '',
@@ -35,62 +33,29 @@ async function listEvents(req, res) {
 async function eventDetail(req, res) {
   const { id } = req.params;
   try {
-    const [evRows] = await db.query(
-      `SELECT e.*, u.nombre AS creator_nombre
-       FROM events e JOIN users u ON e.creator_id = u.id
-       WHERE e.id = ?`, [id]
-    );
+    const [evRows] = await EventModel.findById(id);
     if (!evRows.length) {
       return res.status(404).render('error', { title: '404', message: 'Evento no encontrado.' });
     }
     const event = evRows[0];
 
-    const [registeredTeams] = await db.query(
-      `SELECT DISTINCT t.*, u.nombre AS creator_nombre
-       FROM registrations r
-       JOIN teams t ON r.team_id  = t.id
-       JOIN users u ON t.creator_id = u.id
-       WHERE r.evento_id = ? AND r.team_id IS NOT NULL`, [id]
-    );
-
-    const [matches] = await db.query(
-      `SELECT m.*, t1.nombre AS team1_nombre, t2.nombre AS team2_nombre
-       FROM matches m
-       JOIN teams t1 ON m.team1_id = t1.id
-       JOIN teams t2 ON m.team2_id = t2.id
-       WHERE m.evento_id = ?
-       ORDER BY m.fecha ASC`, [id]
-    );
-
-    const [[{ teamCount }]] = await db.query(
-      'SELECT COUNT(DISTINCT team_id) AS teamCount FROM registrations WHERE evento_id = ?', [id]
-    );
+    const [registeredTeams]        = await TeamModel.findByEvent(id);
+    const [matches]                = await MatchModel.findByEvent(id);
+    const [[{ teamCount }]]        = await RegistrationModel.countTeamsByEvent(id);
 
     let userRegistration = null;
     let isFavorite       = false;
     let userTeams        = [];
 
     if (req.user) {
-      const [regs] = await db.query(
-        `SELECT r.*, t.nombre AS team_nombre
-         FROM registrations r
-         JOIN teams t ON r.team_id = t.id
-         WHERE r.user_id = ? AND r.evento_id = ?`,
-        [req.user.id, id]
-      );
+      const [regs] = await RegistrationModel.findByUserAndEventWithTeam(req.user.id, id);
       userRegistration = regs[0] || null;
 
-      const [favs] = await db.query(
-        'SELECT id FROM favorites WHERE user_id = ? AND evento_id = ?',
-        [req.user.id, id]
-      );
+      const [favs] = await FavoriteModel.findByUserAndEvent(req.user.id, id);
       isFavorite = favs.length > 0;
 
       if (event.estado === 'abierto') {
-        const [teams] = await db.query(
-          'SELECT * FROM teams WHERE creator_id = ? AND tipo = ? ORDER BY nombre',
-          [req.user.id, event.tipo]
-        );
+        const [teams] = await TeamModel.findByOwnerAndTipo(req.user.id, event.tipo);
         userTeams = teams;
       }
     }
@@ -155,11 +120,7 @@ async function createEvent(req, res) {
   const imagen     = req.file ? req.file.filename : null;
   const creator_id = req.user.id;
   try {
-    await db.query(
-      `INSERT INTO events (titulo, descripcion, tipo, fecha, lugar, max_equipos, min_equipos, imagen, creator_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [titulo, descripcion, tipo, fecha, lugar, max_equipos, min_equipos, imagen, creator_id]
-    );
+    await EventModel.create(titulo, descripcion, tipo, fecha, lugar, max_equipos, min_equipos, imagen, creator_id);
     req.flash('success', 'Evento creado correctamente.');
     res.redirect('/eventos');
   } catch (err) {
@@ -173,7 +134,7 @@ async function createEvent(req, res) {
 async function showEditForm(req, res) {
   const { id } = req.params;
   try {
-    const [rows] = await db.query('SELECT * FROM events WHERE id = ?', [id]);
+    const [rows] = await EventModel.findByIdRaw(id);
     if (!rows.length) return res.render('error', { title: '404', message: 'Evento no encontrado.' });
     res.render('eventos/form', { event: rows[0] });
   } catch (err) {
@@ -194,7 +155,7 @@ async function updateEvent(req, res) {
     return res.redirect(`/eventos/${id}/editar`);
   }
   try {
-    const [rows] = await db.query('SELECT imagen FROM events WHERE id = ?', [id]);
+    const [rows] = await EventModel.findImageById(id);
     if (!rows.length) return res.render('error', { title: '404', message: 'Evento no encontrado.' });
 
     let imagen = rows[0].imagen;
@@ -206,12 +167,7 @@ async function updateEvent(req, res) {
       imagen = req.file.filename;
     }
 
-    await db.query(
-      `UPDATE events
-       SET titulo=?, descripcion=?, tipo=?, fecha=?, lugar=?, max_equipos=?, min_equipos=?, imagen=?, estado=?
-       WHERE id=?`,
-      [titulo, descripcion, tipo, fecha, lugar, max_equipos, min_equipos || 2, imagen, estado, id]
-    );
+    await EventModel.update(id, titulo, descripcion, tipo, fecha, lugar, max_equipos, min_equipos || 2, imagen, estado);
     req.flash('success', 'Evento actualizado correctamente.');
     res.redirect(`/eventos/${id}`);
   } catch (err) {
@@ -225,12 +181,12 @@ async function updateEvent(req, res) {
 async function deleteEvent(req, res) {
   const { id } = req.params;
   try {
-    const [rows] = await db.query('SELECT imagen FROM events WHERE id = ?', [id]);
+    const [rows] = await EventModel.findImageById(id);
     if (rows.length && rows[0].imagen) {
       const img = path.join(__dirname, '../../public/uploads', rows[0].imagen);
       if (fs.existsSync(img)) fs.unlinkSync(img);
     }
-    await db.query('DELETE FROM events WHERE id = ?', [id]);
+    await EventModel.remove(id);
     req.flash('success', 'Evento eliminado correctamente.');
     res.redirect('/admin/eventos');
   } catch (err) {
