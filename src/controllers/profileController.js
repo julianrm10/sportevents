@@ -6,7 +6,11 @@ const TeamModel         = require('../models/team.model');
 async function showProfile(req, res) {
   const user_id = req.user.id;
   try {
-    const [[userData]]    = await UserModel.findById(user_id);
+    const [[userData]] = await UserModel.findById(user_id);
+    if (!userData) {
+      res.clearCookie('token');
+      return res.redirect('/auth/login');
+    }
     const [registrations] = await RegistrationModel.findByUser(user_id);
     const [favorites]     = await FavoriteModel.findByUser(user_id);
     const [teams]         = await TeamModel.findByOwner(user_id);
