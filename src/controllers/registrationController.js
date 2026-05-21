@@ -44,8 +44,9 @@ async function registerTeam(req, res) {
 }
 
 async function cancelRegistration(req, res) {
-  const { evento_id } = req.body;
+  const { evento_id, redirect_to } = req.body;
   const user_id = req.user.id;
+  const redirectTarget = (redirect_to && redirect_to.startsWith('/')) ? redirect_to : `/eventos/${evento_id}`;
   try {
     const [evRows] = await EventModel.findOpenById(evento_id);
     if (!evRows.length) {
@@ -54,7 +55,7 @@ async function cancelRegistration(req, res) {
     }
     await RegistrationModel.removeByUserAndEvent(user_id, evento_id);
     req.flash('success', 'Inscripción cancelada correctamente.');
-    res.redirect(`/eventos/${evento_id}`);
+    res.redirect(redirectTarget);
   } catch (err) {
     console.error(err);
     req.flash('error', 'Ha ocurrido un error, inténtalo de nuevo.');
