@@ -9,18 +9,25 @@ const ESTADO_COLOR = { abierto:'success', en_curso:'warning', finalizado:'second
 const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Finalizado' };
 %>
 
-<main class="flex-grow-1">
+<main class="flex-grow-1" style="background:#f8f9fa;">
   <div class="container py-4">
 
     <!-- Cabecera del perfil -->
     <div class="card border-0 shadow-sm mb-4 overflow-hidden">
-      <div class="profile-header-bg"></div>
-      <div class="card-body pt-0">
-        <div class="d-flex flex-column flex-md-row align-items-center gap-3 align-items-md-end">
+      <!-- Banner -->
+      <div class="profile-banner">
+        <div class="profile-banner-overlay"></div>
+        <div class="profile-avatar-wrap">
           <div class="profile-avatar">
             <%= profileUser.nombre.charAt(0).toUpperCase() %>
           </div>
-          <div class="pb-2">
+        </div>
+      </div>
+      <!-- Cuerpo -->
+      <div class="card-body" style="padding-top:3rem; position:relative;">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
+          <!-- Info usuario -->
+          <div>
             <p class="text-muted small mb-1">¡Bienvenido/a!</p>
             <h2 class="fw-bold mb-0"><%= profileUser.nombre %></h2>
             <div class="text-muted"><i class="bi bi-envelope me-1"></i><%= profileUser.email %></div>
@@ -34,18 +41,19 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
               </span>
             </div>
           </div>
-          <div class="ms-md-auto d-flex gap-3 text-center pb-2">
-            <div>
-              <div class="h4 fw-bold mb-0 text-primary"><%= registrations.length %></div>
-              <div class="small text-muted">Inscripciones</div>
+          <!-- Estadísticas -->
+          <div class="ms-md-auto d-flex gap-2">
+            <div class="profile-stat-card">
+              <div class="profile-stat-number" style="color:#1d4ed8;"><%= registrations.length %></div>
+              <div class="profile-stat-label">Inscripciones</div>
             </div>
-            <div>
-              <div class="h4 fw-bold mb-0 text-warning"><%= favorites.length %></div>
-              <div class="small text-muted">Favoritos</div>
+            <div class="profile-stat-card">
+              <div class="profile-stat-number" style="color:#fbbf24;"><%= favorites.length %></div>
+              <div class="profile-stat-label">Favoritos</div>
             </div>
-            <div>
-              <div class="h4 fw-bold mb-0 text-success"><%= teams.length %></div>
-              <div class="small text-muted">Equipos</div>
+            <div class="profile-stat-card">
+              <div class="profile-stat-number" style="color:#16a34a;"><%= teams.length %></div>
+              <div class="profile-stat-label">Equipos</div>
             </div>
           </div>
         </div>
@@ -58,21 +66,21 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
     <ul class="nav nav-tabs mb-4" id="profileTabs">
       <li class="nav-item">
         <a class="nav-link active" data-bs-toggle="tab" href="#tab-inscripciones">
-          <i class="bi bi-person-check me-1"></i>
+          <i class="ti ti-trophy me-1"></i>
           Mis inscripciones
           <span class="badge bg-primary ms-1"><%= registrations.length %></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" data-bs-toggle="tab" href="#tab-favoritos">
-          <i class="bi bi-star me-1"></i>
+          <i class="ti ti-star me-1"></i>
           Favoritos
           <span class="badge bg-warning text-dark ms-1"><%= favorites.length %></span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" data-bs-toggle="tab" href="#tab-equipos">
-          <i class="bi bi-shield me-1"></i>
+          <i class="ti ti-shield me-1"></i>
           Mis equipos
           <span class="badge bg-success ms-1"><%= teams.length %></span>
         </a>
@@ -203,7 +211,7 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
             <% } else { %>
             <div class="d-flex flex-column gap-3">
               <% teams.forEach(team => { %>
-              <div class="card border-0 shadow-sm">
+              <div class="card border-0 shadow-sm team-card-<%= team.tipo %>">
                 <div class="card-body d-flex align-items-center gap-3">
                   <div class="team-avatar sport-bg-<%= team.tipo %>">
                     <%= SPORT_ICON[team.tipo] %>
@@ -221,7 +229,7 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
                         data-bs-title="No puedes eliminar un equipo con un torneo en curso">
                     <button type="button" class="btn btn-sm btn-outline-danger"
                             disabled style="pointer-events:none;">
-                      <i class="bi bi-trash"></i>
+                      <i class="ti ti-trash"></i>
                     </button>
                   </span>
                   <% } else { %>
@@ -230,7 +238,7 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
                             data-form="del-team-<%= team.id %>"
                             data-msg="¿Eliminar el equipo «<%= team.nombre %>»? Esta acción no se puede deshacer."
                             onclick="showConfirmModal(this.dataset.msg, this.dataset.form)">
-                      <i class="bi bi-trash"></i>
+                      <i class="ti ti-trash"></i>
                     </button>
                   </form>
                   <% } %>
@@ -244,8 +252,8 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
           <!-- Formulario crear equipo -->
           <div class="col-lg-5">
             <div class="card border-0 shadow-sm">
-              <div class="card-header bg-success text-white fw-bold py-3">
-                <i class="bi bi-shield-plus me-2"></i>Crear nuevo equipo
+              <div class="card-header text-white fw-bold py-3" style="background-color:#1e3a8a;">
+                <i class="ti ti-shield-plus me-2"></i>Crear nuevo equipo
               </div>
               <div class="card-body">
                 <form action="/equipos/crear" method="POST">
@@ -264,8 +272,8 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
                       <option value="otros">🏅 Otros</option>
                     </select>
                   </div>
-                  <button type="submit" class="btn btn-success w-100 fw-semibold">
-                    <i class="bi bi-shield-plus me-2"></i>Crear equipo
+                  <button type="submit" class="btn w-100 fw-semibold text-white" style="background-color:#1e3a8a;">
+                    <i class="ti ti-shield-plus me-2"></i>Crear equipo
                   </button>
                 </form>
                 <div class="form-text text-muted mt-2">
