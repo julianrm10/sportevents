@@ -71,8 +71,15 @@ function removeByTeam(team_id) {
   return db.query('DELETE FROM registrations WHERE team_id = ?', [team_id]);
 }
 
+function removeByUserAndEvent(user_id, evento_id) {
+  return db.query(
+    'DELETE FROM registrations WHERE user_id = ? AND evento_id = ?',
+    [user_id, evento_id]
+  );
+}
+
 module.exports = {
   findByUserAndEvent, findByUserAndEventWithTeam, findByUser,
   countTeamsByEvent, countInscribed, countActiveByTeam,
-  create, updateTeam, removeByTeam,
+  create, updateTeam, removeByTeam, removeByUserAndEvent,
 };

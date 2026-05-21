@@ -404,6 +404,19 @@ const isFinished   = event.estado === 'finalizado';
                 </button>
               </form>
               <% } %>
+
+              <!-- Cancelar inscripción -->
+              <form id="cancel-reg-<%= event.id %>"
+                    action="/eventos/cancelar-inscripcion" method="POST"
+                    class="mt-2">
+                <input type="hidden" name="evento_id" value="<%= event.id %>">
+                <button type="button" class="btn btn-outline-danger btn-sm w-100"
+                        data-form="cancel-reg-<%= event.id %>"
+                        data-msg="¿Cancelar tu inscripción en este evento? Tu equipo será retirado del torneo."
+                        onclick="showConfirmModal(this.dataset.msg, this.dataset.form)">
+                  <i class="bi bi-x-circle me-1"></i>Cancelar inscripción
+                </button>
+              </form>
               <% } %>
 
             <% } else if (event.estado === 'en_curso') { %>

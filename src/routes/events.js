@@ -14,8 +14,9 @@ router.get('/crear', auth, admin, eventCtrl.showCreateForm);
 router.post('/crear', auth, admin, upload.single('imagen'), eventCtrl.createEvent);
 
 // Acciones autenticadas (POST, sin parámetro dinámico)
-router.post('/inscribir-equipo', auth, regCtrl.registerTeam);
-router.post('/favorito',         auth, favCtrl.toggleFavorite);
+router.post('/inscribir-equipo',     auth, regCtrl.registerTeam);
+router.post('/cancelar-inscripcion', auth, regCtrl.cancelRegistration);
+router.post('/favorito',             auth, favCtrl.toggleFavorite);
 
 // ── Rutas con :id ─────────────────────────────────────────────
 router.get('/:id', eventCtrl.eventDetail);

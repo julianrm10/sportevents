@@ -43,4 +43,23 @@ async function registerTeam(req, res) {
   }
 }
 
-module.exports = { registerTeam };
+async function cancelRegistration(req, res) {
+  const { evento_id } = req.body;
+  const user_id = req.user.id;
+  try {
+    const [evRows] = await EventModel.findOpenById(evento_id);
+    if (!evRows.length) {
+      req.flash('error', 'No se puede cancelar la inscripción de un evento que no está abierto.');
+      return res.redirect(`/eventos/${evento_id}`);
+    }
+    await RegistrationModel.removeByUserAndEvent(user_id, evento_id);
+    req.flash('success', 'Inscripción cancelada correctamente.');
+    res.redirect(`/eventos/${evento_id}`);
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Ha ocurrido un error, inténtalo de nuevo.');
+    res.redirect(`/eventos/${evento_id}`);
+  }
+}
+
+module.exports = { registerTeam, cancelRegistration };
