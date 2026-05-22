@@ -167,12 +167,12 @@ body {
 }
 
 /* ── Team card sport stripe ── */
-.team-card-futbol_sala { border-left: 4px solid #16a34a !important; }
+.team-card-futbol { border-left: 4px solid #16a34a !important; }
 .team-card-baloncesto  { border-left: 4px solid #f97316 !important; }
 .team-card-tenis       { border-left: 4px solid #fbbf24 !important; }
 
 /* ── Sport background colours ── */
-.sport-bg-futbol_sala { background-color: #d1fae5; color: #065f46; }
+.sport-bg-futbol { background-color: #d1fae5; color: #065f46; }
 .sport-bg-baloncesto  { background-color: #fef3c7; color: #92400e; }
 .sport-bg-tenis       { background-color: #dbeafe; color: #1e40af; }
 

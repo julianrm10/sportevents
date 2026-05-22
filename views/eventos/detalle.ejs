@@ -3,9 +3,9 @@
 <%- include('../partials/navbar') %>
 
 <%
-const SPORT_ICON   = { futbol_sala:'⚽', baloncesto:'🏀', tenis:'🎾' };
-const SPORT_COLOR  = { futbol_sala:'success', baloncesto:'warning', tenis:'info' };
-const SPORT_LABEL  = { futbol_sala:'Fútbol Sala', baloncesto:'Baloncesto', tenis:'Tenis' };
+const SPORT_ICON   = { futbol:'⚽', baloncesto:'🏀', tenis:'🎾' };
+const SPORT_COLOR  = { futbol:'success', baloncesto:'warning', tenis:'info' };
+const SPORT_LABEL  = { futbol:'Fútbol', baloncesto:'Baloncesto', tenis:'Tenis' };
 const ESTADO_COLOR = { abierto:'success', en_curso:'warning', finalizado:'secondary' };
 const ESTADO_LABEL = { abierto:'Inscripciones abiertas', en_curso:'En curso', finalizado:'Finalizado' };
 const isOpen       = event.estado === 'abierto';
@@ -18,13 +18,13 @@ const isTenis      = event.tipo === 'tenis';
   <!-- Hero del evento -->
   <%
   const DEFAULT_IMAGES = {
-    futbol_sala: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=1200',
+    futbol: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=1200',
     baloncesto:  'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=1200',
     tenis:       'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1200',
   };
   const heroImg = event.imagen
     ? '/uploads/' + event.imagen
-    : DEFAULT_IMAGES[event.tipo] || DEFAULT_IMAGES.futbol_sala;
+    : DEFAULT_IMAGES[event.tipo] || DEFAULT_IMAGES.futbol;
   %>
   <div class="container-lg px-3 px-lg-4 mt-3">
     <div class="event-detail-hero position-relative rounded-4 overflow-hidden">
@@ -82,7 +82,7 @@ const isTenis      = event.tipo === 'tenis';
               <% registeredTeams.forEach(t => { %>
               <li class="list-group-item d-flex align-items-center gap-3 py-3">
                 <div class="team-avatar sport-bg-<%= t.tipo %>">
-                  <% if (t.tipo === 'futbol_sala') { %>
+                  <% if (t.tipo === 'futbol') { %>
                     <i class="ti ti-ball-football"></i>
                   <% } else if (t.tipo === 'baloncesto') { %>
                     <i class="ti ti-ball-basketball"></i>
@@ -182,11 +182,11 @@ const isTenis      = event.tipo === 'tenis';
           </div>
           <%
           const COL_HEADERS = {
-            futbol_sala: { sf:'GF', sc:'GC', sd:'DG', sfTitle:'Goles a favor', scTitle:'Goles en contra', sdTitle:'Diferencia de goles' },
+            futbol: { sf:'GF', sc:'GC', sd:'DG', sfTitle:'Goles a favor', scTitle:'Goles en contra', sdTitle:'Diferencia de goles' },
             baloncesto:  { sf:'PF', sc:'PC', sd:'DP', sfTitle:'Puntos a favor', scTitle:'Puntos en contra', sdTitle:'Diferencia de puntos' },
             tenis:       { sf:'SF', sc:'SC', sd:'DS', sfTitle:'Sets a favor',   scTitle:'Sets en contra',   sdTitle:'Diferencia de sets' },
           };
-          const cols = COL_HEADERS[event.tipo] || COL_HEADERS.futbol_sala;
+          const cols = COL_HEADERS[event.tipo] || COL_HEADERS.futbol;
           %>
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 small">
@@ -409,23 +409,6 @@ const isTenis      = event.tipo === 'tenis';
                 <a href="/perfil" class="text-muted">Puedes hacerlo desde tu perfil.</a>
               </div>
 
-              <!-- Cambiar equipo -->
-              <% if (userTeams.length > 1) { %>
-              <form action="/eventos/inscribir-equipo" method="POST" class="mt-3">
-                <input type="hidden" name="evento_id" value="<%= event.id %>">
-                <label class="form-label small fw-semibold text-muted">Cambiar de equipo</label>
-                <select name="team_id" class="form-select form-select-sm mb-2">
-                  <% userTeams.forEach(t => { %>
-                  <option value="<%= t.id %>" <%= userRegistration.team_id == t.id ? 'selected':'' %>>
-                    <%= t.nombre %>
-                  </option>
-                  <% }) %>
-                </select>
-                <button type="submit" class="btn btn-outline-primary btn-sm w-100">
-                  <i class="bi bi-arrow-repeat me-1"></i>Cambiar equipo
-                </button>
-              </form>
-              <% } %>
               <% } %>
 
             <% } else if (event.estado === 'en_curso') { %>

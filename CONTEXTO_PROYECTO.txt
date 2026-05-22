@@ -1,0 +1,429 @@
+========================================================
+  CONTEXTO COMPLETO DEL PROYECTO EVENTOSPORT
+  (Pega este prompt al inicio de un chat nuevo con Claude)
+========================================================
+
+Hola, voy a ponerte en contexto de la aplicación web que estoy desarrollando para que puedas ayudarme directamente sin necesidad de explorarla desde cero.
+
+=============================================
+1. QUÉ ES LA APLICACIÓN
+=============================================
+
+EventoSport es una plataforma web de gestión de torneos deportivos. Los usuarios pueden:
+- Ver y filtrar eventos deportivos
+- Crear equipos y apuntarse a torneos
+- Seguir la clasificación en tiempo real
+- Guardar eventos favoritos
+- Leer noticias deportivas
+
+Los administradores pueden:
+- Crear, editar y eliminar eventos
+- Generar partidos automáticamente (sistema round-robin)
+- Actualizar resultados de partidos
+- Finalizar torneos
+
+La aplicación soporta 3 deportes: fútbol, baloncesto y tenis. Cada uno tiene sus propias columnas de clasificación (goles/puntos/sets).
+
+=============================================
+2. STACK TECNOLÓGICO
+=============================================
+
+- Backend:    Node.js + Express 4
+- Vistas:     EJS (template engine, server-side rendering)
+- Base datos: MySQL con mysql2 (pool de conexiones, promise-based)
+- Estilos:    Bootstrap 5 + CSS propio (public/css/style.css)
+- Iconos:     Bootstrap Icons (bi bi-*) + Tabler Icons (ti ti-*)
+- Auth:       JWT almacenado en cookie httpOnly (7 días), bcrypt para passwords
+- Sesión:     express-session + connect-flash (mensajes flash)
+- Uploads:    multer → public/uploads/ (jpg/png/gif/webp, máx 5MB)
+- Noticias:   API externa GNews (fetch en /noticias)
+- Docs:       paquete docx (generación de Word, sin uso activo visible en vistas)
+- Dev:        nodemon (script dev), seed.js para datos de prueba
+
+El servidor arranca en el puerto 3000 (o env PORT). Entry point: app.js.
+
+=============================================
+3. ESTRUCTURA DE CARPETAS
+=============================================
+
+eventosport/
+├── app.js                         ← Entry point, middlewares, rutas, 404/500
+├── database.sql                   ← Esquema completo de la BD
+├── seed.js                        ← Datos de prueba
+├── package.json
+├── .env                           ← DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, JWT_SECRET, PORT
+├── src/
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── events.js
+│   │   ├── teams.js
+│   │   ├── admin.js
+│   │   ├── profile.js
+│   │   └── news.routes.js
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   ├── eventController.js
+│   │   ├── teamController.js
+│   │   ├── registrationController.js
+│   │   ├── favoriteController.js
+│   │   ├── profileController.js
+│   │   └── adminController.js
+│   ├── models/
+│   │   ├── user.model.js
+│   │   ├── event.model.js
+│   │   ├── team.model.js
+│   │   ├── registration.model.js
+│   │   ├── match.model.js
+│   │   └── favorite.model.js
+│   ├── middlewares/
+│   │   ├── auth.js       ← requireAuth: verifica JWT, redirige a /auth/login
+│   │   ├── admin.js      ← requireAdmin: verifica role=admin, devuelve 403
+│   │   └── upload.js     ← multer, guarda en public/uploads/
+│   └── db/
+│       └── connection.js ← Pool MySQL2, config desde .env
+├── views/
+│   ├── eventos/
+│   │   ├── index.ejs     ← Listado de eventos con filtros
+│   │   ├── detalle.ejs   ← Detalle de evento + clasificación + partidos
+│   │   └── form.ejs      ← Formulario crear/editar evento
+│   ├── auth/
+│   │   ├── login.ejs
+│   │   └── register.ejs
+│   ├── perfil/
+│   │   └── index.ejs     ← Perfil con tabs: inscripciones, favoritos, equipos
+│   ├── admin/
+│   │   ├── dashboard.ejs ← Panel con stats y accesos rápidos
+│   │   ├── events.ejs    ← Tabla gestión de eventos
+│   │   └── matches.ejs   ← Gestión de partidos de un evento
+│   ├── partials/
+│   │   ├── head.ejs      ← Meta, CSS includes
+│   │   ├── navbar.ejs    ← Navegación principal
+│   │   ├── footer.ejs
+│   │   ├── flash.ejs     ← Alertas éxito/error
+│   │   └── modal-confirm.ejs ← Modal Bootstrap reutilizable para confirmar acciones
+│   ├── noticias/
+│   │   └── index.ejs     ← Cards de artículos GNews
+│   ├── error.ejs
+│   ├── nosotros.ejs
+│   └── faq.ejs
+└── public/
+    ├── css/style.css
+    ├── js/               ← Scripts frontend
+    └── uploads/          ← Imágenes de eventos subidas
+
+=============================================
+4. BASE DE DATOS - TABLAS
+=============================================
+
+Base de datos: eventosport (charset utf8mb4)
+
+--- users ---
+  id          INT PK AUTO_INCREMENT
+  nombre      VARCHAR(100) NOT NULL
+  email       VARCHAR(150) NOT NULL UNIQUE
+  password    VARCHAR(255) NOT NULL  ← bcrypt hash
+  role        ENUM('user','admin')   DEFAULT 'user'
+  created_at  TIMESTAMP
+
+--- events ---
+  id          INT PK AUTO_INCREMENT
+  titulo      VARCHAR(200) NOT NULL
+  descripcion TEXT
+  tipo        ENUM('futbol','baloncesto','tenis') NOT NULL
+  fecha       DATETIME NOT NULL
+  lugar       VARCHAR(200) NOT NULL
+  max_equipos INT DEFAULT 20
+  min_equipos INT DEFAULT 2
+  imagen      VARCHAR(255)  ← nombre del archivo en public/uploads/
+  estado      ENUM('abierto','en_curso','finalizado') DEFAULT 'abierto'
+  creator_id  INT FK→users.id CASCADE
+  created_at  TIMESTAMP
+
+--- teams ---
+  id          INT PK AUTO_INCREMENT
+  nombre      VARCHAR(150) NOT NULL
+  tipo        ENUM('futbol','baloncesto','tenis') NOT NULL
+  creator_id  INT FK→users.id CASCADE
+  created_at  TIMESTAMP
+
+--- registrations ---
+  id          INT PK AUTO_INCREMENT
+  user_id     INT NOT NULL FK→users.id CASCADE
+  evento_id   INT NOT NULL FK→events.id CASCADE
+  team_id     INT NOT NULL FK→teams.id CASCADE
+  created_at  TIMESTAMP
+  UNIQUE (user_id, evento_id)  ← un usuario solo se inscribe una vez por evento
+
+--- matches ---
+  id          INT PK AUTO_INCREMENT
+  evento_id   INT NOT NULL FK→events.id CASCADE
+  team1_id    INT NOT NULL FK→teams.id CASCADE
+  team2_id    INT NOT NULL FK→teams.id CASCADE
+  score_team1 INT DEFAULT 0  ← goles (fútbol), puntos (baloncesto), sets (tenis)
+  score_team2 INT DEFAULT 0
+  fecha       DATETIME NULL
+  estado      ENUM('pendiente','jugado') DEFAULT 'pendiente'
+  created_at  TIMESTAMP
+
+--- favorites ---
+  id          INT PK AUTO_INCREMENT
+  user_id     INT NOT NULL FK→users.id CASCADE
+  evento_id   INT NOT NULL FK→events.id CASCADE
+  created_at  TIMESTAMP
+  UNIQUE (user_id, evento_id)
+
+=============================================
+5. RUTAS COMPLETAS
+=============================================
+
+GET  /                         → redirige a /eventos
+
+-- AUTH (/auth) --
+GET  /auth/login               → showLogin
+POST /auth/login               → login (genera JWT, cookie 7d)
+GET  /auth/register            → showRegister
+POST /auth/register            → register (valida, bcrypt, crea user)
+GET  /auth/logout              → limpia cookie, redirige login
+
+-- EVENTOS (/eventos) --
+GET  /eventos                  → listEvents (query: ?tipo=&estado=)
+GET  /eventos/crear            → [auth,admin] showCreateForm
+POST /eventos/crear            → [auth,admin,upload] createEvent
+GET  /eventos/:id              → eventDetail
+GET  /eventos/:id/editar       → [auth,admin] showEditForm
+POST /eventos/:id/editar       → [auth,admin,upload] updateEvent
+POST /eventos/:id/eliminar     → [auth,admin] deleteEvent
+POST /eventos/inscribir-equipo → [auth] registerTeam (body: evento_id, team_id)
+POST /eventos/cancelar-inscripcion → [auth] cancelRegistration (body: evento_id, redirect_to)
+POST /eventos/favorito         → [auth] toggleFavorite (body: evento_id)
+
+-- EQUIPOS (/equipos) --
+POST /equipos/crear            → [auth] createTeam (body: nombre, tipo)
+POST /equipos/:id/eliminar     → [auth] deleteTeam
+
+-- ADMIN (/admin) -- todos requieren [auth, admin] --
+GET  /admin                    → showDashboard
+GET  /admin/eventos            → manageEvents (query: ?estado=)
+GET  /admin/partidos           → manageMatches (query: ?evento_id=)
+POST /admin/eventos/:id/generar-partidos → generateMatches (round-robin, transacción)
+POST /admin/eventos/:id/finalizar        → finalizeEvent
+POST /admin/partidos/:id/actualizar      → updateMatch (body: score_team1, score_team2, estado, fecha)
+
+-- PERFIL (/perfil) --
+GET  /perfil                   → [auth] showProfile
+
+-- NOTICIAS (/noticias) --
+GET  /noticias                 → fetch GNews API (últimas 12 noticias deportivas en español)
+
+-- ESTÁTICAS --
+GET  /nosotros                 → vista informativa
+GET  /faq                      → preguntas frecuentes
+
+=============================================
+6. AUTENTICACIÓN Y SESIÓN
+=============================================
+
+- Al hacer login se crea un JWT firmado con JWT_SECRET (expira 7d).
+- Se almacena en cookie "token" (httpOnly, sameSite: lax).
+- El middleware global de app.js lo verifica en cada request:
+  - Si válido: inyecta req.user = { id, nombre, email, role } y res.locals.user
+  - Si inválido/expirado: limpia la cookie y asigna null
+- requireAuth (middlewares/auth.js): si no hay req.user → redirige a /auth/login
+- requireAdmin (middlewares/admin.js): si req.user.role !== 'admin' → 403
+
+En las vistas EJS, el usuario está disponible como la variable "user" (puede ser null si no autenticado).
+
+=============================================
+7. PANTALLAS Y FUNCIONAMIENTO DETALLADO
+=============================================
+
+--- PANTALLA: /eventos (index) ---
+Hero con imagen de fondo, título "Eventos Deportivos" y CTA:
+  - Si admin: botón "Crear evento"
+  - Si anónimo: botón "Regístrate para competir"
+Filtros: botones para tipo (Todos / Fútbol / Baloncesto / Tenis) y estado (Todos / Abierto / En curso / Finalizado). Se pasan como query params.
+Grid de cards (1/2/3 columnas según viewport). Cada card:
+  - Thumbnail (imagen del evento o placeholder con emoji del deporte)
+  - Badges: tipo (color por deporte) + estado (verde/naranja/gris)
+  - Título
+  - Descripción truncada
+  - Fecha y lugar
+  - Contador "X / max_equipos equipos" (badge rojo si completo)
+  - Botón "Ver evento"
+
+--- PANTALLA: /eventos/:id (detalle) ---
+Layout 2 columnas (8 + 4).
+
+Columna principal (8):
+  1. Descripción del evento
+  2. "Equipos inscritos": lista con avatar (icono Tabler por deporte con color de fondo), nombre equipo, nombre del creador
+  3. "Partidos": tabla con team1 | marcador (score1-score2) | team2 | fecha | estado (badge pendiente/jugado). Solo visible si hay partidos.
+  4. "Clasificación": tabla round-robin (solo si hay partidos).
+     - Columnas: Pos | Equipo | PJ | G | E | P | GF | GC | DG | Pts
+       (E y GF/GC/DG cambian nombre según deporte, tenis no tiene empate)
+     - Medallas emoji en top 3 si evento finalizado
+     - Ordenado: puntos DESC → diferencia DESC → GF DESC
+
+Sidebar (4):
+  - Fecha/hora del evento
+  - Lugar
+  - Participantes: "X / max_equipos equipos" con barra de progreso
+  - Creado por
+  - Sección "Mi participación":
+    · No autenticado → "Inicia sesión para inscribirte"
+    · Evento finalizado → aviso, muestra equipo con el que participó
+    · Evento abierto + no inscrito → selector de equipos del usuario del mismo tipo
+      (si no tiene equipos de ese tipo → aviso "crea un equipo en tu perfil")
+    · Evento abierto + inscrito → muestra equipo actual + select para cambiar si tiene otro
+    · Evento en_curso → aviso "inscripción cerrada, torneo en curso"
+  - Botón favorito (estrella, toggle, si autenticado y no finalizado)
+  - Panel admin (si admin): botones editar, gestionar partidos, eliminar
+
+--- PANTALLA: /eventos/crear y /eventos/:id/editar (form) ---
+Campos: titulo*, tipo* (select fútbol/baloncesto/tenis), fecha datetime*, lugar*, min_equipos (default 2)*, max_equipos (default 20)*, descripción (textarea), imagen (file).
+Si editar: también campo "Estado" (abierto/en_curso/finalizado).
+Si hay imagen actual: se muestra miniatura.
+Validación cliente: min_equipos <= max_equipos.
+
+--- PANTALLA: /perfil ---
+Header con banner, avatar circular con inicial del nombre (gradiente verde), nombre, email, badge rol, fecha miembro, stats (nº inscripciones, favoritos, equipos).
+3 tabs:
+  1. Mis inscripciones: lista de eventos con info básica. Si abierto: botón "Cancelar inscripción" (con modal confirmación). Si finalizado: badge "Finalizado".
+  2. Mis favoritos: lista de eventos favoritos con botón para quitar favorito.
+  3. Mis equipos: 2 columnas
+     - Izquierda: lista de equipos (card con borde de color por deporte, icono Tabler, nombre, tipo). Si el equipo está en torneo en curso: botón eliminar deshabilitado con tooltip. Si no: botón eliminar con modal confirmación.
+     - Derecha: formulario "Crear nuevo equipo" (nombre + select tipo + botón crear).
+
+--- PANTALLA: /auth/login ---
+Card centrada. Logo "SportEvents". Campos email + password. Link "¿No tienes cuenta? Regístrate".
+
+--- PANTALLA: /auth/register ---
+Card centrada. Campos: nombre, email, contraseña, confirmar contraseña. Validación cliente: passwords coinciden. Link "¿Ya tienes cuenta? Inicia sesión".
+
+--- PANTALLA: /admin (dashboard) ---
+4 stat cards: total eventos / total equipos / equipos inscritos / partidos pendientes.
+3 quick-access cards: Gestionar Eventos / Gestionar Partidos / Crear Evento.
+Tabla "Últimos eventos": #, evento (título+lugar), tipo (badge), fecha, estado (badge), inscritos/max, partidos jugados, partidos pendientes. Enlace a ver detalle y gestionar partidos.
+
+--- PANTALLA: /admin/eventos ---
+Filtro por estado (tabs o select).
+Tabla completa: #, evento, tipo, fecha, estado, equipos X/max, jugados, pendientes, acciones (ver detalle, editar, gestionar partidos, eliminar con modal confirmación).
+
+--- PANTALLA: /admin/partidos ---
+Selector desplegable para elegir evento.
+Si evento seleccionado y sin partidos generados:
+  - Card "Generar partidos":
+    - Barra de progreso: equipos inscritos vs min_equipos
+    - Si puede generar (>= min_equipos): botón "Generar partidos" con modal confirmación
+    - Si no puede: aviso "Faltan X equipos" + botón deshabilitado
+Si evento en_curso:
+  - Card "Finalizar torneo": botón habilitado solo si todos los partidos están jugados (pendingCount=0), si no: aviso de cuántos quedan.
+Lista de partidos:
+  - Cada partido: nombres de los dos equipos, marcador actual
+  - Form inline para actualizar: score_team1, score_team2, estado (select pendiente/jugado), fecha opcional → botón "Guardar"
+
+--- PANTALLA: /noticias ---
+Grid de cards con artículos de GNews (deporte, en español). Cada card: imagen, fuente, título, descripción, link "Leer más".
+
+--- PANTALLA: /nosotros ---
+Información estática sobre la plataforma.
+
+--- PANTALLA: /faq ---
+Preguntas frecuentes estáticas.
+
+--- PANTALLA: error.ejs ---
+Vista de error genérica. Recibe variables: statusCode, message.
+
+=============================================
+8. LÓGICA DE NEGOCIO IMPORTANTE
+=============================================
+
+CLASIFICACIÓN (round-robin):
+- Se calcula en tiempo real en eventController.js::eventDetail()
+- Para cada partido jugado se suman puntos a ambos equipos
+- Victoria = 3 puntos, Empate = 1 punto (no aplica en tenis), Derrota = 0
+- En tenis: no hay empate (score_team1 nunca = score_team2 si jugado)
+- Orden: puntos DESC → diferencia (GF-GC) DESC → GF DESC
+- Las columnas de la tabla cambian nombre según el deporte:
+  · fútbol:     GF, GC, DG (Goles a favor, Goles en contra, Diferencia de goles)
+  · baloncesto: PF, PC, DP (Puntos a favor, Puntos en contra, Diferencia de puntos)
+  · tenis:      SF, SC, DS (Sets a favor, Sets en contra, Diferencia de sets)
+
+GENERACIÓN DE PARTIDOS (round-robin):
+- Se generan todos los enfrentamientos posibles: n*(n-1)/2 partidos
+- Todos con score 0-0, estado 'pendiente'
+- El evento pasa a estado 'en_curso' automáticamente
+- Se usa una transacción MySQL (connection.beginTransaction)
+
+INSCRIPCIÓN DE EQUIPOS:
+- El equipo debe pertenecer al usuario autenticado
+- El tipo del equipo debe coincidir con el tipo del evento
+- Un usuario solo puede inscribir un equipo por evento (UNIQUE en registrations)
+- Si ya tiene equipo inscrito y selecciona otro: se hace UPDATE (cambio de equipo)
+- No se puede inscribir si el evento ya alcanzó max_equipos (a menos que ya esté inscrito)
+
+CANCELAR INSCRIPCIÓN:
+- Solo si el evento sigue en estado 'abierto'
+- Solo disponible desde /perfil (botón en tab inscripciones)
+
+ELIMINAR EQUIPO:
+- No se puede eliminar un equipo que esté inscrito en un evento en_curso
+- Si se elimina: primero se borran las registraciones del equipo, luego el equipo
+
+FINALIZAR EVENTO:
+- Solo si estado = 'en_curso'
+- Solo si pendingCount = 0 (todos los partidos tienen estado 'jugado')
+
+=============================================
+9. VARIABLES DE ENTORNO (.env)
+=============================================
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=eventosport
+JWT_SECRET=<clave secreta>
+PORT=3000
+
+=============================================
+10. CONVENCIONES DE CÓDIGO
+=============================================
+
+- Arquitectura MVC: routes → controllers → models
+- Los modelos devuelven siempre el resultado de mysql2 (array destructured: [rows])
+- Los controllers hacen res.render() o res.redirect() directamente
+- Mensajes flash: req.flash('success'/'error', 'mensaje') antes de redirect
+- En las vistas EJS se accede a: user (objeto o null), eventos, event, teams, etc. según la vista
+- Las rutas de acción POST que modifican datos redirigen después (PRG pattern)
+- Los modales de confirmación usan el partial modal-confirm.ejs con Bootstrap
+- Iconos de deporte en avatares: ti ti-ball-football (fútbol), ti ti-ball-basketball, ti ti-ball-tennis
+- Colores por deporte: fútbol=success(verde), baloncesto=warning(naranja), tenis=info(azul)
+- Clases CSS por deporte: .team-card-futbol, .sport-bg-futbol, etc.
+
+=============================================
+11. COSAS A TENER EN CUENTA
+=============================================
+
+- El campo "tipo" en events y teams usa los valores: 'futbol', 'baloncesto', 'tenis'
+  (antes era 'futbol_sala', se cambió a 'futbol' — si hay datos en BD hay que migrarlos:
+   UPDATE events SET tipo='futbol' WHERE tipo='futbol_sala';
+   UPDATE teams  SET tipo='futbol' WHERE tipo='futbol_sala';)
+
+- Las imágenes de eventos se guardan en public/uploads/ con nombre timestamp_random.ext
+  Al editar o eliminar un evento se borra el archivo del filesystem con fs.unlink
+
+- La navbar muestra el enlace /admin solo si user.role === 'admin'
+
+- En /perfil el flag "en_curso_activo" en cada equipo indica si tiene inscripción
+  activa en un evento en estado 'en_curso' (para deshabilitar botón de eliminar)
+
+- connect-flash requiere que express-session esté configurado antes
+
+- El token JWT se decodifica en el middleware global de app.js y se inyecta en
+  res.locals.user, por lo que todas las vistas EJS tienen acceso a "user" directamente
+
+========================================================
+  FIN DEL CONTEXTO — Ya puedes ayudarme con cualquier
+  cambio, mejora o bug de la aplicación EventoSport.
+========================================================

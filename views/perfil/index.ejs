@@ -3,9 +3,9 @@
 <%- include('../partials/navbar') %>
 
 <%
-const SPORT_ICON   = { futbol_sala:'⚽', baloncesto:'🏀', tenis:'🎾' };
-const SPORT_COLOR  = { futbol_sala:'success', baloncesto:'warning', tenis:'info' };
-const SPORT_LABEL  = { futbol_sala:'Fútbol Sala', baloncesto:'Baloncesto', tenis:'Tenis' };
+const SPORT_ICON   = { futbol:'⚽', baloncesto:'🏀', tenis:'🎾' };
+const SPORT_COLOR  = { futbol:'success', baloncesto:'warning', tenis:'info' };
+const SPORT_LABEL  = { futbol:'Fútbol', baloncesto:'Baloncesto', tenis:'Tenis' };
 const ESTADO_COLOR = { abierto:'success', en_curso:'warning', finalizado:'secondary' };
 const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Finalizado' };
 %>
@@ -228,7 +228,7 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
               <div class="card border-0 shadow-sm team-card-<%= team.tipo %>">
                 <div class="card-body d-flex align-items-center gap-3">
                   <div class="team-avatar sport-bg-<%= team.tipo %>">
-                    <% if (team.tipo === 'futbol_sala') { %>
+                    <% if (team.tipo === 'futbol') { %>
                       <i class="ti ti-ball-football"></i>
                     <% } else if (team.tipo === 'baloncesto') { %>
                       <i class="ti ti-ball-basketball"></i>
@@ -286,7 +286,7 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
                     <label for="equipo-tipo" class="form-label fw-semibold">Deporte <span class="text-danger">*</span></label>
                     <select id="equipo-tipo" name="tipo" class="form-select" required>
                       <option value="">Selecciona deporte</option>
-                      <option value="futbol_sala">⚽ Fútbol Sala</option>
+                      <option value="futbol">⚽ Fútbol</option>
                       <option value="baloncesto">🏀 Baloncesto</option>
                       <option value="tenis">🎾 Tenis</option>
                     </select>

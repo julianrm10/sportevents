@@ -9,7 +9,7 @@ const MatchModel        = require('../models/match.model');
 // ── Listado de eventos ────────────────────────────────────────
 async function listEvents(req, res) {
   const { tipo, estado } = req.query;
-  const validTipos   = ['futbol_sala','baloncesto','tenis'];
+  const validTipos   = ['futbol','baloncesto','tenis'];
   const validEstados = ['abierto','en_curso','finalizado'];
   try {
     const conditions = [];

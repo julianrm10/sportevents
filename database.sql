@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS events (
   id                INT AUTO_INCREMENT PRIMARY KEY,
   titulo            VARCHAR(200) NOT NULL,
   descripcion       TEXT,
-  tipo              ENUM('futbol_sala','baloncesto','tenis') NOT NULL,
+  tipo              ENUM('futbol','baloncesto','tenis') NOT NULL,
   fecha             DATETIME     NOT NULL,
   lugar             VARCHAR(200) NOT NULL,
   max_equipos       INT          NOT NULL DEFAULT 20,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE TABLE IF NOT EXISTS teams (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   nombre      VARCHAR(150) NOT NULL,
-  tipo        ENUM('futbol_sala','baloncesto','tenis') NOT NULL,
+  tipo        ENUM('futbol','baloncesto','tenis') NOT NULL,
   creator_id  INT          NOT NULL,
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_team_creator FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS registrations (
 ) ENGINE=InnoDB;
 
 -- Tabla de partidos
--- score_team1/score_team2: goles (futbol_sala), puntos (baloncesto) o sets (tenis)
+-- score_team1/score_team2: goles (futbol), puntos (baloncesto) o sets (tenis)
 CREATE TABLE IF NOT EXISTS matches (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   evento_id    INT NOT NULL,
@@ -110,5 +110,5 @@ INSERT INTO users (nombre, email, password, role) VALUES
 --                            CHANGE goles_team2 score_team2 INT NOT NULL DEFAULT 0;
 
 -- Actualizar ENUM de tipo en events y teams a 3 deportes
--- ALTER TABLE events MODIFY tipo ENUM('futbol_sala','baloncesto','tenis') NOT NULL;
--- ALTER TABLE teams  MODIFY tipo ENUM('futbol_sala','baloncesto','tenis') NOT NULL;
+-- ALTER TABLE events MODIFY tipo ENUM('futbol','baloncesto','tenis') NOT NULL;
+-- ALTER TABLE teams  MODIFY tipo ENUM('futbol','baloncesto','tenis') NOT NULL;
