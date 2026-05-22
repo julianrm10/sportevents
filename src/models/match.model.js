@@ -49,10 +49,10 @@ function create(evento_id, team1_id, team2_id, conn = db) {
   );
 }
 
-function update(id, goles_team1, goles_team2, estado, fecha) {
+function update(id, stats_team1, stats_team2, estado, fecha) {
   return db.query(
-    'UPDATE matches SET goles_team1=?, goles_team2=?, estado=?, fecha=? WHERE id=?',
-    [goles_team1, goles_team2, estado, fecha, id]
+    'UPDATE matches SET stats_team1=?, stats_team2=?, estado=?, fecha=? WHERE id=?',
+    [stats_team1, stats_team2, estado, fecha, id]
   );
 }
 

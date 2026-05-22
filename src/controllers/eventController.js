@@ -9,7 +9,7 @@ const MatchModel        = require('../models/match.model');
 // ── Listado de eventos ────────────────────────────────────────
 async function listEvents(req, res) {
   const { tipo, estado } = req.query;
-  const validTipos   = ['futbol','baloncesto','tenis','otros'];
+  const validTipos   = ['futbol_sala','baloncesto','tenis'];
   const validEstados = ['abierto','en_curso','finalizado'];
   try {
     const conditions = [];
@@ -66,29 +66,30 @@ async function eventDetail(req, res) {
       standingsMap[t.id] = {
         id: t.id, nombre: t.nombre,
         jugados: 0, ganados: 0, empatados: 0, perdidos: 0,
-        gfavor: 0, gcontra: 0, puntos: 0,
+        sfavor: 0, scontra: 0, puntos: 0,
       };
     });
+    const allowDraws = event.tipo !== 'tenis';
     matches.filter(m => m.estado === 'jugado').forEach(m => {
       const t1 = standingsMap[m.team1_id];
       const t2 = standingsMap[m.team2_id];
       if (!t1 || !t2) return;
       t1.jugados++; t2.jugados++;
-      t1.gfavor  += m.goles_team1; t1.gcontra += m.goles_team2;
-      t2.gfavor  += m.goles_team2; t2.gcontra += m.goles_team1;
-      if (m.goles_team1 > m.goles_team2) {
+      t1.sfavor  += m.stats_team1; t1.scontra += m.stats_team2;
+      t2.sfavor  += m.stats_team2; t2.scontra += m.stats_team1;
+      if (m.stats_team1 > m.stats_team2) {
         t1.ganados++; t1.puntos += 3; t2.perdidos++;
-      } else if (m.goles_team1 < m.goles_team2) {
+      } else if (m.stats_team1 < m.stats_team2) {
         t2.ganados++; t2.puntos += 3; t1.perdidos++;
-      } else {
+      } else if (allowDraws) {
         t1.empatados++; t1.puntos++; t2.empatados++; t2.puntos++;
       }
     });
     const standings = Object.values(standingsMap).sort((a, b) => {
       if (b.puntos !== a.puntos) return b.puntos - a.puntos;
-      const gdDiff = (b.gfavor - b.gcontra) - (a.gfavor - a.gcontra);
-      if (gdDiff !== 0) return gdDiff;
-      return b.gfavor - a.gfavor;
+      const sdDiff = (b.sfavor - b.scontra) - (a.sfavor - a.scontra);
+      if (sdDiff !== 0) return sdDiff;
+      return b.sfavor - a.sfavor;
     });
 
     res.render('eventos/detalle', {

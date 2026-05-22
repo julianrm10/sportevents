@@ -3,8 +3,9 @@
 <%- include('../partials/navbar') %>
 
 <%
-const SPORT_ICON  = { futbol:'⚽', baloncesto:'🏀', tenis:'🎾', otros:'🏅' };
-const SPORT_COLOR = { futbol:'success', baloncesto:'warning', tenis:'info', otros:'secondary' };
+const SPORT_ICON  = { futbol_sala:'⚽', baloncesto:'🏀', tenis:'🎾' };
+const SPORT_COLOR = { futbol_sala:'success', baloncesto:'warning', tenis:'info' };
+const SPORT_LABEL = { futbol_sala:'Fútbol Sala', baloncesto:'Baloncesto', tenis:'Tenis' };
 const ESTADO_COLOR= { abierto:'success', en_curso:'warning', finalizado:'secondary' };
 const ESTADO_LABEL= { abierto:'Abierto', en_curso:'En curso', finalizado:'Finalizado' };
 %>
@@ -51,21 +52,17 @@ const ESTADO_LABEL= { abierto:'Abierto', en_curso:'En curso', finalizado:'Finali
            class="btn btn-sm <%= !tipo ? 'btn-primary' : 'btn-outline-primary' %>">
           Todos
         </a>
-        <a href="/eventos?tipo=futbol<%= estado ? '&estado='+estado : '' %>"
-           class="btn btn-sm <%= tipo==='futbol'     ? 'btn-success'           : 'btn-outline-success' %>">
-          ⚽ Fútbol
+        <a href="/eventos?tipo=futbol_sala<%= estado ? '&estado='+estado : '' %>"
+           class="btn btn-sm <%= tipo==='futbol_sala' ? 'btn-success'           : 'btn-outline-success' %>">
+          ⚽ Fútbol Sala
         </a>
         <a href="/eventos?tipo=baloncesto<%= estado ? '&estado='+estado : '' %>"
-           class="btn btn-sm <%= tipo==='baloncesto' ? 'btn-warning text-dark' : 'btn-outline-warning' %>">
+           class="btn btn-sm <%= tipo==='baloncesto'  ? 'btn-warning text-dark' : 'btn-outline-warning' %>">
           🏀 Baloncesto
         </a>
         <a href="/eventos?tipo=tenis<%= estado ? '&estado='+estado : '' %>"
-           class="btn btn-sm <%= tipo==='tenis'      ? 'btn-info text-dark'    : 'btn-outline-info' %>">
+           class="btn btn-sm <%= tipo==='tenis'       ? 'btn-info text-dark'    : 'btn-outline-info' %>">
           🎾 Tenis
-        </a>
-        <a href="/eventos?tipo=otros<%= estado ? '&estado='+estado : '' %>"
-           class="btn btn-sm <%= tipo==='otros'      ? 'btn-secondary'         : 'btn-outline-secondary' %>">
-          🏅 Otros
         </a>
       </div>
 
@@ -130,7 +127,7 @@ const ESTADO_LABEL= { abierto:'Abierto', en_curso:'En curso', finalizado:'Finali
             <!-- Badges -->
             <div class="d-flex gap-2 mb-2 flex-wrap">
               <span class="badge bg-<%= SPORT_COLOR[ev.tipo] %> text-<%= ev.tipo==='baloncesto'||ev.tipo==='tenis' ? 'dark' : 'white' %>">
-                <%= SPORT_ICON[ev.tipo] %> <%= ev.tipo.charAt(0).toUpperCase()+ev.tipo.slice(1) %>
+                <%= SPORT_ICON[ev.tipo] %> <%= SPORT_LABEL[ev.tipo] %>
               </span>
               <span class="badge bg-<%= ESTADO_COLOR[ev.estado] %>">
                 <%= ESTADO_LABEL[ev.estado] %>

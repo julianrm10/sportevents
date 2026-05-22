@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS events (
   id                INT AUTO_INCREMENT PRIMARY KEY,
   titulo            VARCHAR(200) NOT NULL,
   descripcion       TEXT,
-  tipo              ENUM('futbol','baloncesto','tenis','otros') NOT NULL,
+  tipo              ENUM('futbol_sala','baloncesto','tenis') NOT NULL,
   fecha             DATETIME     NOT NULL,
   lugar             VARCHAR(200) NOT NULL,
   max_equipos       INT          NOT NULL DEFAULT 20,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE TABLE IF NOT EXISTS teams (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   nombre      VARCHAR(150) NOT NULL,
-  tipo        ENUM('futbol','baloncesto','tenis','otros') NOT NULL,
+  tipo        ENUM('futbol_sala','baloncesto','tenis') NOT NULL,
   creator_id  INT          NOT NULL,
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_team_creator FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
@@ -60,13 +60,14 @@ CREATE TABLE IF NOT EXISTS registrations (
 ) ENGINE=InnoDB;
 
 -- Tabla de partidos
+-- stats_team1/stats_team2: goles (futbol_sala), puntos (baloncesto) o sets (tenis)
 CREATE TABLE IF NOT EXISTS matches (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   evento_id    INT NOT NULL,
   team1_id     INT NOT NULL,
   team2_id     INT NOT NULL,
-  goles_team1  INT NOT NULL DEFAULT 0,
-  goles_team2  INT NOT NULL DEFAULT 0,
+  stats_team1  INT NOT NULL DEFAULT 0,
+  stats_team2  INT NOT NULL DEFAULT 0,
   fecha        DATETIME,
   estado       ENUM('pendiente','jugado') NOT NULL DEFAULT 'pendiente',
   created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -99,3 +100,15 @@ INSERT INTO users (nombre, email, password, role) VALUES
 -- Nota: Para generar el hash correcto, ejecuta en Node.js:
 -- require('bcrypt').hash('admin123', 10).then(console.log)
 -- Luego actualiza el INSERT con el hash generado.
+
+-- ============================================
+-- Migraciones aplicadas
+-- ============================================
+
+-- Renombrar columnas de marcador en matches
+-- ALTER TABLE matches RENAME COLUMN goles_team1 TO stats_team1;
+-- ALTER TABLE matches RENAME COLUMN goles_team2 TO stats_team2;
+
+-- Actualizar ENUM de tipo en events y teams a 3 deportes
+-- ALTER TABLE events MODIFY tipo ENUM('futbol_sala','baloncesto','tenis') NOT NULL;
+-- ALTER TABLE teams  MODIFY tipo ENUM('futbol_sala','baloncesto','tenis') NOT NULL;

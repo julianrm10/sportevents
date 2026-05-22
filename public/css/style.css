@@ -1,5 +1,5 @@
 /* ============================================================
-   SportEvents — Custom Styles
+   SportEvents — Estilos
    ============================================================ */
 
 /* ── Base ── */
@@ -167,16 +167,14 @@ body {
 }
 
 /* ── Team card sport stripe ── */
-.team-card-futbol     { border-left: 4px solid #16a34a !important; }
-.team-card-baloncesto { border-left: 4px solid #f97316 !important; }
-.team-card-tenis      { border-left: 4px solid #fbbf24 !important; }
-.team-card-otros      { border-left: 4px solid #1d4ed8 !important; }
+.team-card-futbol_sala { border-left: 4px solid #16a34a !important; }
+.team-card-baloncesto  { border-left: 4px solid #f97316 !important; }
+.team-card-tenis       { border-left: 4px solid #fbbf24 !important; }
 
 /* ── Sport background colours ── */
-.sport-bg-futbol     { background-color: #d1fae5; color: #065f46; }
-.sport-bg-baloncesto { background-color: #fef3c7; color: #92400e; }
-.sport-bg-tenis      { background-color: #dbeafe; color: #1e40af; }
-.sport-bg-otros      { background-color: #f3f4f6; color: #374151; }
+.sport-bg-futbol_sala { background-color: #d1fae5; color: #065f46; }
+.sport-bg-baloncesto  { background-color: #fef3c7; color: #92400e; }
+.sport-bg-tenis       { background-color: #dbeafe; color: #1e40af; }
 
 /* ── Responsive tweaks ── */
 @media (max-width: 768px) {

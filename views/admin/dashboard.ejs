@@ -3,7 +3,8 @@
 <%- include('../partials/navbar') %>
 
 <%
-const SPORT_ICON   = { futbol:'⚽', baloncesto:'🏀', tenis:'🎾', otros:'🏅' };
+const SPORT_ICON   = { futbol_sala:'⚽', baloncesto:'🏀', tenis:'🎾' };
+const SPORT_LABEL  = { futbol_sala:'Fútbol Sala', baloncesto:'Baloncesto', tenis:'Tenis' };
 const ESTADO_COLOR = { abierto:'success', en_curso:'warning', finalizado:'secondary' };
 const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Finalizado' };
 %>
@@ -135,7 +136,7 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
             <% recentEvents.forEach(ev => { %>
             <tr>
               <td class="fw-semibold"><%= ev.titulo %></td>
-              <td><%= SPORT_ICON[ev.tipo] %> <%= ev.tipo %></td>
+              <td><%= SPORT_ICON[ev.tipo] %> <%= SPORT_LABEL[ev.tipo] %></td>
               <td class="small"><%= new Date(ev.fecha).toLocaleDateString('es-ES') %></td>
               <td>
                 <span class="badge bg-<%= ESTADO_COLOR[ev.estado] %>">

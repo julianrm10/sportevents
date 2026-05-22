@@ -134,9 +134,9 @@ async function generateMatches(req, res) {
 // ── Actualizar partido ────────────────────────────────────────
 async function updateMatch(req, res) {
   const { id } = req.params;
-  const { goles_team1, goles_team2, estado, fecha, evento_id } = req.body;
+  const { stats_team1, stats_team2, estado, fecha, evento_id } = req.body;
   try {
-    await MatchModel.update(id, goles_team1 || 0, goles_team2 || 0, estado, fecha || null);
+    await MatchModel.update(id, stats_team1 || 0, stats_team2 || 0, estado, fecha || null);
     req.flash('success', 'Resultado guardado correctamente.');
     res.redirect(`/admin/partidos?evento_id=${evento_id}`);
   } catch (err) {

@@ -48,9 +48,9 @@
                   <label for="tipo" class="form-label fw-semibold">Tipo de deporte <span class="text-danger">*</span></label>
                   <select id="tipo" name="tipo" class="form-select" required>
                     <option value="">Selecciona un deporte</option>
-                    <% ['futbol','baloncesto','tenis','otros'].forEach(t => { %>
+                    <% ['futbol_sala','baloncesto','tenis'].forEach(t => { %>
                     <option value="<%= t %>" <%= event && event.tipo===t ? 'selected':'' %>>
-                      <%= {futbol:'⚽ Fútbol', baloncesto:'🏀 Baloncesto', tenis:'🎾 Tenis', otros:'🏅 Otros'}[t] %>
+                      <%= {futbol_sala:'⚽ Fútbol Sala', baloncesto:'🏀 Baloncesto', tenis:'🎾 Tenis'}[t] %>
                     </option>
                     <% }) %>
                   </select>

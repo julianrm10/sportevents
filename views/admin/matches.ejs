@@ -48,6 +48,12 @@
 
     <% if (selectedEvent) { %>
     <%
+    const STAT_LABEL = {
+      futbol_sala: ['Goles equipo 1', 'Goles equipo 2'],
+      baloncesto:  ['Puntos equipo 1', 'Puntos equipo 2'],
+      tenis:       ['Sets equipo 1',   'Sets equipo 2'],
+    };
+    const statLabels    = STAT_LABEL[selectedEvent.tipo] || ['Resultado 1', 'Resultado 2'];
     const canGenerate   = teamCount >= selectedEvent.min_equipos;
     const lacking       = selectedEvent.min_equipos - teamCount;
     const totalPossible = teamCount >= 2 ? (teamCount * (teamCount - 1)) / 2 : 0;
@@ -223,18 +229,18 @@
           <!-- Marcador actual -->
           <div class="d-flex align-items-center justify-content-between mb-3 px-1">
             <span class="fw-bold
-              <%= m.estado === 'jugado' && m.goles_team1 > m.goles_team2 ? 'text-success' : '' %>">
+              <%= m.estado === 'jugado' && m.stats_team1 > m.stats_team2 ? 'text-success' : '' %>">
               <%= m.team1_nombre %>
             </span>
             <span class="badge bg-dark fs-5 px-3 py-2 mx-2 font-monospace">
               <% if (m.estado === 'jugado') { %>
-                <%= m.goles_team1 %>&nbsp;–&nbsp;<%= m.goles_team2 %>
+                <%= m.stats_team1 %>&nbsp;–&nbsp;<%= m.stats_team2 %>
               <% } else { %>
                 vs
               <% } %>
             </span>
             <span class="fw-bold text-end
-              <%= m.estado === 'jugado' && m.goles_team2 > m.goles_team1 ? 'text-success' : '' %>">
+              <%= m.estado === 'jugado' && m.stats_team2 > m.stats_team1 ? 'text-success' : '' %>">
               <%= m.team2_nombre %>
             </span>
           </div>
@@ -247,20 +253,20 @@
               <div class="col-3">
                 <label class="form-label small fw-semibold text-truncate d-block"
                        title="<%= m.team1_nombre %>">
-                  <%= m.team1_nombre.split(' ')[0] %>
+                  <%= statLabels[0] %>
                 </label>
-                <input type="number" name="goles_team1"
+                <input type="number" name="stats_team1"
                        class="form-control form-control-sm text-center fw-bold"
-                       value="<%= m.goles_team1 %>" min="0" max="999" required>
+                       value="<%= m.stats_team1 %>" min="0" max="999" required>
               </div>
               <div class="col-3">
                 <label class="form-label small fw-semibold text-truncate d-block"
                        title="<%= m.team2_nombre %>">
-                  <%= m.team2_nombre.split(' ')[0] %>
+                  <%= statLabels[1] %>
                 </label>
-                <input type="number" name="goles_team2"
+                <input type="number" name="stats_team2"
                        class="form-control form-control-sm text-center fw-bold"
-                       value="<%= m.goles_team2 %>" min="0" max="999" required>
+                       value="<%= m.stats_team2 %>" min="0" max="999" required>
               </div>
               <div class="col-3">
                 <label class="form-label small fw-semibold">Estado</label>
