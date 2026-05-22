@@ -82,7 +82,13 @@ const isTenis      = event.tipo === 'tenis';
               <% registeredTeams.forEach(t => { %>
               <li class="list-group-item d-flex align-items-center gap-3 py-3">
                 <div class="team-avatar sport-bg-<%= t.tipo %>">
-                  <%= SPORT_ICON[t.tipo] %>
+                  <% if (t.tipo === 'futbol_sala') { %>
+                    <i class="ti ti-ball-football"></i>
+                  <% } else if (t.tipo === 'baloncesto') { %>
+                    <i class="ti ti-ball-basketball"></i>
+                  <% } else { %>
+                    <i class="ti ti-ball-tennis"></i>
+                  <% } %>
                 </div>
                 <div>
                   <div class="fw-semibold"><%= t.nombre %></div>
