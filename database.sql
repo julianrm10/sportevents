@@ -60,14 +60,14 @@ CREATE TABLE IF NOT EXISTS registrations (
 ) ENGINE=InnoDB;
 
 -- Tabla de partidos
--- stats_team1/stats_team2: goles (futbol_sala), puntos (baloncesto) o sets (tenis)
+-- score_team1/score_team2: goles (futbol_sala), puntos (baloncesto) o sets (tenis)
 CREATE TABLE IF NOT EXISTS matches (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   evento_id    INT NOT NULL,
   team1_id     INT NOT NULL,
   team2_id     INT NOT NULL,
-  stats_team1  INT NOT NULL DEFAULT 0,
-  stats_team2  INT NOT NULL DEFAULT 0,
+  score_team1  INT NOT NULL DEFAULT 0,
+  score_team2  INT NOT NULL DEFAULT 0,
   fecha        DATETIME,
   estado       ENUM('pendiente','jugado') NOT NULL DEFAULT 'pendiente',
   created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -106,8 +106,8 @@ INSERT INTO users (nombre, email, password, role) VALUES
 -- ============================================
 
 -- Renombrar columnas de marcador en matches
--- ALTER TABLE matches RENAME COLUMN goles_team1 TO stats_team1;
--- ALTER TABLE matches RENAME COLUMN goles_team2 TO stats_team2;
+-- ALTER TABLE matches CHANGE goles_team1 score_team1 INT NOT NULL DEFAULT 0,
+--                            CHANGE goles_team2 score_team2 INT NOT NULL DEFAULT 0;
 
 -- Actualizar ENUM de tipo en events y teams a 3 deportes
 -- ALTER TABLE events MODIFY tipo ENUM('futbol_sala','baloncesto','tenis') NOT NULL;

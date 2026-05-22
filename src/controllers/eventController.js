@@ -75,11 +75,11 @@ async function eventDetail(req, res) {
       const t2 = standingsMap[m.team2_id];
       if (!t1 || !t2) return;
       t1.jugados++; t2.jugados++;
-      t1.sfavor  += m.stats_team1; t1.scontra += m.stats_team2;
-      t2.sfavor  += m.stats_team2; t2.scontra += m.stats_team1;
-      if (m.stats_team1 > m.stats_team2) {
+      t1.sfavor  += m.score_team1; t1.scontra += m.score_team2;
+      t2.sfavor  += m.score_team2; t2.scontra += m.score_team1;
+      if (m.score_team1 > m.score_team2) {
         t1.ganados++; t1.puntos += 3; t2.perdidos++;
-      } else if (m.stats_team1 < m.stats_team2) {
+      } else if (m.score_team1 < m.score_team2) {
         t2.ganados++; t2.puntos += 3; t1.perdidos++;
       } else if (allowDraws) {
         t1.empatados++; t1.puntos++; t2.empatados++; t2.puntos++;

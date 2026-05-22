@@ -229,18 +229,18 @@
           <!-- Marcador actual -->
           <div class="d-flex align-items-center justify-content-between mb-3 px-1">
             <span class="fw-bold
-              <%= m.estado === 'jugado' && m.stats_team1 > m.stats_team2 ? 'text-success' : '' %>">
+              <%= m.estado === 'jugado' && m.score_team1 > m.score_team2 ? 'text-success' : '' %>">
               <%= m.team1_nombre %>
             </span>
             <span class="badge bg-dark fs-5 px-3 py-2 mx-2 font-monospace">
               <% if (m.estado === 'jugado') { %>
-                <%= m.stats_team1 %>&nbsp;–&nbsp;<%= m.stats_team2 %>
+                <%= m.score_team1 %>&nbsp;–&nbsp;<%= m.score_team2 %>
               <% } else { %>
                 vs
               <% } %>
             </span>
             <span class="fw-bold text-end
-              <%= m.estado === 'jugado' && m.stats_team2 > m.stats_team1 ? 'text-success' : '' %>">
+              <%= m.estado === 'jugado' && m.score_team2 > m.score_team1 ? 'text-success' : '' %>">
               <%= m.team2_nombre %>
             </span>
           </div>
@@ -255,18 +255,18 @@
                        title="<%= m.team1_nombre %>">
                   <%= statLabels[0] %>
                 </label>
-                <input type="number" name="stats_team1"
+                <input type="number" name="score_team1"
                        class="form-control form-control-sm text-center fw-bold"
-                       value="<%= m.stats_team1 %>" min="0" max="999" required>
+                       value="<%= m.score_team1 %>" min="0" max="999" required>
               </div>
               <div class="col-3">
                 <label class="form-label small fw-semibold text-truncate d-block"
                        title="<%= m.team2_nombre %>">
                   <%= statLabels[1] %>
                 </label>
-                <input type="number" name="stats_team2"
+                <input type="number" name="score_team2"
                        class="form-control form-control-sm text-center fw-bold"
-                       value="<%= m.stats_team2 %>" min="0" max="999" required>
+                       value="<%= m.score_team2 %>" min="0" max="999" required>
               </div>
               <div class="col-3">
                 <label class="form-label small fw-semibold">Estado</label>

@@ -123,19 +123,19 @@ const isTenis      = event.tipo === 'tenis';
                 <tbody>
                   <% matches.forEach(m => { %>
                   <tr>
-                    <td class="fw-semibold <%= m.estado==='jugado' && m.stats_team1 > m.stats_team2 ? 'text-success' : '' %>">
+                    <td class="fw-semibold <%= m.estado==='jugado' && m.score_team1 > m.score_team2 ? 'text-success' : '' %>">
                       <%= m.team1_nombre %>
                     </td>
                     <td class="text-center">
                       <% if (m.estado === 'jugado') { %>
                       <span class="badge bg-dark fs-6 px-3 py-2">
-                        <%= m.stats_team1 %> – <%= m.stats_team2 %>
+                        <%= m.score_team1 %> – <%= m.score_team2 %>
                       </span>
                       <% } else { %>
                       <span class="badge bg-secondary px-3 py-2">vs</span>
                       <% } %>
                     </td>
-                    <td class="fw-semibold <%= m.estado==='jugado' && m.stats_team2 > m.stats_team1 ? 'text-success' : '' %>">
+                    <td class="fw-semibold <%= m.estado==='jugado' && m.score_team2 > m.score_team1 ? 'text-success' : '' %>">
                       <%= m.team2_nombre %>
                     </td>
                     <td class="small">
