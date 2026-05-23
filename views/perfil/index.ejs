@@ -141,7 +141,7 @@ const ESTADO_LABEL = { abierto:'Abierto', en_curso:'En curso', finalizado:'Final
                     <input type="hidden" name="evento_id" value="<%= reg.evento_id %>">
                     <input type="hidden" name="redirect_to" value="/perfil#tab-inscripciones">
                     <button type="button" class="btn btn-sm btn-outline-danger w-100"
-                            onclick="showConfirmModal('¿Cancelar tu inscripción en este evento? Tu equipo será retirado del torneo.', 'cancel-reg-<%= reg.evento_id %>')">
+                            onclick="showConfirmModal('¿Cancelar tu inscripción en este evento? Tu equipo será retirado del torneo.', 'cancel-reg-<%= reg.evento_id %>', {btnText:'Confirmar'})">
                       <i class="bi bi-x-circle me-1"></i>Cancelar
                     </button>
                   </form>
