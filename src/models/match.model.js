@@ -7,7 +7,7 @@ function findByEvent(evento_id) {
      JOIN teams t1 ON m.team1_id = t1.id
      JOIN teams t2 ON m.team2_id = t2.id
      WHERE m.evento_id = ?
-     ORDER BY m.fecha ASC`,
+     ORDER BY COALESCE(m.fecha, '9999-12-31') ASC`,
     [evento_id]
   );
 }

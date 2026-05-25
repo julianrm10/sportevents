@@ -25,7 +25,8 @@ async function registerTeam(req, res) {
 
     const [regs] = await RegistrationModel.findByUserAndEvent(user_id, evento_id);
     if (regs.length) {
-      await RegistrationModel.updateTeam(team_id, user_id, evento_id);
+      req.flash('error', 'Ya estás inscrito en este evento.');
+      return res.redirect(`/eventos/${evento_id}`);
     } else {
       const [[{ teamCount }]] = await RegistrationModel.countTeamsByEvent(evento_id);
       if (teamCount >= evRows[0].max_equipos) {
