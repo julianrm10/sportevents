@@ -137,7 +137,7 @@ async function updateMatch(req, res) {
   const { score_team1, score_team2, estado, fecha, evento_id } = req.body;
   try {
     await MatchModel.update(id, score_team1 || 0, score_team2 || 0, estado, fecha || null);
-    req.flash('success', 'Resultado guardado correctamente.');
+    req.flash('success', 'Partido actualizado correctamente.');
     res.redirect(`/admin/partidos?evento_id=${evento_id}`);
   } catch (err) {
     console.error(err);
