@@ -1,5 +1,7 @@
+// Controlador de favoritos: añadir y quitar eventos de la lista de favoritos
 const FavoriteModel = require('../models/favorite.model');
 
+// Alterna el estado de favorito de un evento para el usuario autenticado
 async function toggleFavorite(req, res) {
   const { evento_id } = req.body;
   const user_id = req.user.id;

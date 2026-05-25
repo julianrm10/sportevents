@@ -1,3 +1,4 @@
+// Controlador de autenticación: registro, login y logout de usuarios
 const bcrypt    = require('bcrypt');
 const jwt       = require('jsonwebtoken');
 const UserModel = require('../models/user.model');
@@ -8,16 +9,19 @@ const COOKIE_OPTS = {
   maxAge:   7 * 24 * 60 * 60 * 1000,
 };
 
+// Muestra el formulario de login
 function showLogin(req, res) {
   if (req.user) return res.redirect('/eventos');
   res.render('auth/login');
 }
 
+// Muestra el formulario de registro
 function showRegister(req, res) {
   if (req.user) return res.redirect('/eventos');
   res.render('auth/register');
 }
 
+// Autentica al usuario y genera el token JWT
 async function login(req, res) {
   const { email, password } = req.body;
   try {
@@ -47,6 +51,7 @@ async function login(req, res) {
   }
 }
 
+// Valida los datos y crea un nuevo usuario
 async function register(req, res) {
   const { nombre, email, password, password2 } = req.body;
   if (!nombre || nombre.trim().length < 3) {
@@ -82,6 +87,7 @@ async function register(req, res) {
   }
 }
 
+// Elimina la cookie de sesión y redirige al login
 function logout(req, res) {
   res.clearCookie('token');
   res.redirect('/auth/login');

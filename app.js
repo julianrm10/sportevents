@@ -1,3 +1,4 @@
+// Punto de entrada de la aplicación: configura Express, middlewares y rutas
 require('dotenv').config();
 const express      = require('express');
 const cookieParser = require('cookie-parser');
@@ -8,29 +9,31 @@ const jwt          = require('jsonwebtoken');
 
 const app = express();
 
-// ── View engine ──────────────────────────────────────────────
+// Motor de plantillas EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// ── Core middleware ───────────────────────────────────────────
+// Middlewares de parseo y archivos estáticos
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Sesión necesaria para los mensajes flash
 app.use(session({
-  secret: process.env.JWT_SECRET,
-  resave: false,
+  secret:            process.env.JWT_SECRET,
+  resave:            false,
   saveUninitialized: false,
-  cookie: { maxAge: 60 * 60 * 1000 },
+  cookie:            { maxAge: 60 * 60 * 1000 },
 }));
 app.use(flash());
 
-// ── Global auth: inyecta req.user y res.locals.user ──────────
+// Inyecta req.user y res.locals.user en cada petición a partir del JWT de la cookie
 app.use((req, res, next) => {
   const token = req.cookies.token;
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded   = jwt.verify(token, process.env.JWT_SECRET);
       req.user        = decoded;
       res.locals.user = decoded;
     } catch {
@@ -44,7 +47,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── Flash messages disponibles en todas las vistas ───────────
+// Expone los mensajes flash a todas las vistas
 app.use((req, res, next) => {
   res.locals.flash = {
     success: req.flash('success'),
@@ -53,24 +56,24 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── Routes ────────────────────────────────────────────────────
-app.use('/auth',      require('./src/routes/auth'));
-app.use('/eventos',   require('./src/routes/events'));
-app.use('/equipos',   require('./src/routes/teams'));
-app.use('/admin',     require('./src/routes/admin'));
-app.use('/perfil',    require('./src/routes/profile'));
-app.use('/noticias',  require('./src/routes/news.routes'));
+// Rutas
+app.use('/auth',     require('./src/routes/auth'));
+app.use('/eventos',  require('./src/routes/events'));
+app.use('/equipos',  require('./src/routes/teams'));
+app.use('/admin',    require('./src/routes/admin'));
+app.use('/perfil',   require('./src/routes/profile'));
+app.use('/noticias', require('./src/routes/news.routes'));
 
-app.get('/', (req, res) => res.redirect('/eventos'));
+app.get('/',         (req, res) => res.redirect('/eventos'));
 app.get('/nosotros', (req, res) => res.render('nosotros', { title: 'Nosotros' }));
 app.get('/faq',      (req, res) => res.render('faq',      { title: 'Preguntas frecuentes' }));
 
-// ── 404 ───────────────────────────────────────────────────────
+// Manejador 404
 app.use((req, res) => {
   res.status(404).render('error', { title: 'Página no encontrada', message: 'La página que buscas no existe.' });
 });
 
-// ── Error handler ─────────────────────────────────────────────
+// Manejador de errores internos
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).render('error', { title: 'Error del servidor', message: 'Algo salió mal. Inténtalo de nuevo.' });

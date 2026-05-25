@@ -1,7 +1,9 @@
+// Controlador de inscripciones: alta y baja de equipos en eventos
 const EventModel        = require('../models/event.model');
 const TeamModel         = require('../models/team.model');
 const RegistrationModel = require('../models/registration.model');
 
+// Inscribe el equipo seleccionado en el evento si cumple todas las condiciones
 async function registerTeam(req, res) {
   const { evento_id, team_id } = req.body;
   const user_id = req.user.id;
@@ -27,14 +29,15 @@ async function registerTeam(req, res) {
     if (regs.length) {
       req.flash('error', 'Ya estás inscrito en este evento.');
       return res.redirect(`/eventos/${evento_id}`);
-    } else {
-      const [[{ teamCount }]] = await RegistrationModel.countTeamsByEvent(evento_id);
-      if (teamCount >= evRows[0].max_equipos) {
-        req.flash('error', 'Este torneo ya está completo.');
-        return res.redirect(`/eventos/${evento_id}`);
-      }
-      await RegistrationModel.create(user_id, evento_id, team_id);
     }
+
+    const [[{ teamCount }]] = await RegistrationModel.countTeamsByEvent(evento_id);
+    if (teamCount >= evRows[0].max_equipos) {
+      req.flash('error', 'Este torneo ya está completo.');
+      return res.redirect(`/eventos/${evento_id}`);
+    }
+
+    await RegistrationModel.create(user_id, evento_id, team_id);
     req.flash('success', 'Equipo inscrito correctamente.');
     res.redirect(`/eventos/${evento_id}`);
   } catch (err) {
@@ -44,6 +47,7 @@ async function registerTeam(req, res) {
   }
 }
 
+// Cancela la inscripción del usuario en un evento abierto
 async function cancelRegistration(req, res) {
   const { evento_id, redirect_to } = req.body;
   const user_id = req.user.id;

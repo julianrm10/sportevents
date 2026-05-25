@@ -1,3 +1,4 @@
+// Controlador de eventos: listado, detalle, creación, edición y eliminación
 const fs                = require('fs');
 const path              = require('path');
 const EventModel        = require('../models/event.model');
@@ -6,11 +7,11 @@ const RegistrationModel = require('../models/registration.model');
 const FavoriteModel     = require('../models/favorite.model');
 const MatchModel        = require('../models/match.model');
 
-// ── Listado de eventos ────────────────────────────────────────
+// Lista eventos aplicando filtros opcionales de tipo y estado
 async function listEvents(req, res) {
   const { tipo, estado } = req.query;
-  const validTipos   = ['futbol','baloncesto','tenis'];
-  const validEstados = ['abierto','en_curso','finalizado'];
+  const validTipos   = ['futbol', 'baloncesto', 'tenis'];
+  const validEstados = ['abierto', 'en_curso', 'finalizado'];
   try {
     const conditions = [];
     const params     = [];
@@ -29,7 +30,7 @@ async function listEvents(req, res) {
   }
 }
 
-// ── Detalle de evento ─────────────────────────────────────────
+// Muestra el detalle de un evento con equipos, partidos y clasificación calculada
 async function eventDetail(req, res) {
   const { id } = req.params;
   try {
@@ -60,7 +61,7 @@ async function eventDetail(req, res) {
       }
     }
 
-    // ── Clasificación ─────────────────────────────────────────
+    // Calcula la clasificación round-robin a partir de los partidos jugados
     const standingsMap = {};
     registeredTeams.forEach(t => {
       standingsMap[t.id] = {
@@ -102,12 +103,12 @@ async function eventDetail(req, res) {
   }
 }
 
-// ── Formulario crear ──────────────────────────────────────────
+// Muestra el formulario de creación de evento
 function showCreateForm(req, res) {
   res.render('eventos/form', { event: null });
 }
 
-// ── Crear evento ──────────────────────────────────────────────
+// Procesa el formulario y crea un nuevo evento
 async function createEvent(req, res) {
   const { titulo, descripcion, tipo, fecha, lugar, max_equipos, min_equipos } = req.body;
   if (!titulo || !descripcion || !tipo || !fecha || !lugar || !max_equipos || !min_equipos) {
@@ -131,7 +132,7 @@ async function createEvent(req, res) {
   }
 }
 
-// ── Formulario editar ─────────────────────────────────────────
+// Muestra el formulario de edición con los datos actuales del evento
 async function showEditForm(req, res) {
   const { id } = req.params;
   try {
@@ -139,11 +140,12 @@ async function showEditForm(req, res) {
     if (!rows.length) return res.render('error', { title: '404', message: 'Evento no encontrado.' });
     res.render('eventos/form', { event: rows[0] });
   } catch (err) {
+    console.error(err);
     res.render('error', { title: 'Error', message: 'No se pudo cargar el evento.' });
   }
 }
 
-// ── Actualizar evento ─────────────────────────────────────────
+// Procesa el formulario y actualiza los datos del evento
 async function updateEvent(req, res) {
   const { id } = req.params;
   const { titulo, descripcion, tipo, fecha, lugar, max_equipos, min_equipos, estado } = req.body;
@@ -161,6 +163,7 @@ async function updateEvent(req, res) {
 
     let imagen = rows[0].imagen;
     if (req.file) {
+      // Elimina la imagen anterior del sistema de archivos si existe
       if (imagen) {
         const old = path.join(__dirname, '../../public/uploads', imagen);
         if (fs.existsSync(old)) fs.unlinkSync(old);
@@ -168,7 +171,7 @@ async function updateEvent(req, res) {
       imagen = req.file.filename;
     }
 
-    await EventModel.update(id, titulo, descripcion, tipo, fecha, lugar, max_equipos, min_equipos || 2, imagen, estado);
+    await EventModel.update(id, titulo, descripcion, tipo, fecha, lugar, max_equipos, min_equipos, imagen, estado);
     req.flash('success', 'Evento actualizado correctamente.');
     res.redirect(`/eventos/${id}`);
   } catch (err) {
@@ -178,7 +181,7 @@ async function updateEvent(req, res) {
   }
 }
 
-// ── Eliminar evento ───────────────────────────────────────────
+// Elimina el evento y su imagen asociada del servidor
 async function deleteEvent(req, res) {
   const { id } = req.params;
   try {

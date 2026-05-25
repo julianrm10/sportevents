@@ -1,8 +1,10 @@
+// Controlador de perfil: muestra los datos, inscripciones, favoritos y equipos del usuario
 const UserModel         = require('../models/user.model');
 const RegistrationModel = require('../models/registration.model');
 const FavoriteModel     = require('../models/favorite.model');
 const TeamModel         = require('../models/team.model');
 
+// Carga y renderiza el perfil completo del usuario autenticado
 async function showProfile(req, res) {
   const user_id = req.user.id;
   try {

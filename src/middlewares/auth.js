@@ -1,6 +1,6 @@
+// Middleware de autenticación: verifica que exista un token JWT válido en la cookie
 const jwt = require('jsonwebtoken');
 
-// Requiere usuario autenticado
 function authMiddleware(req, res, next) {
   const token = req.cookies.token;
   if (!token) return res.redirect('/auth/login');

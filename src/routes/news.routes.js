@@ -1,3 +1,4 @@
+// Ruta de noticias: obtiene los titulares deportivos desde la API de GNews
 const router = require('express').Router();
 
 router.get('/', async (req, res) => {

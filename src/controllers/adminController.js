@@ -1,10 +1,11 @@
+// Controlador de administración: dashboard, gestión de eventos y partidos
 const db                = require('../db/connection');
 const EventModel        = require('../models/event.model');
 const TeamModel         = require('../models/team.model');
 const RegistrationModel = require('../models/registration.model');
 const MatchModel        = require('../models/match.model');
 
-// ── Dashboard ─────────────────────────────────────────────────
+// Muestra el panel de administración con estadísticas globales y eventos recientes
 async function showDashboard(req, res) {
   try {
     const [[{ totalEvents }]]    = await EventModel.countAll();
@@ -23,7 +24,7 @@ async function showDashboard(req, res) {
   }
 }
 
-// ── Gestión de eventos ────────────────────────────────────────
+// Lista todos los eventos con sus métricas, con filtro opcional por estado
 async function manageEvents(req, res) {
   const { estado } = req.query;
   const validEstados = ['abierto', 'en_curso', 'finalizado'];
@@ -41,7 +42,7 @@ async function manageEvents(req, res) {
   }
 }
 
-// ── Gestión de partidos ───────────────────────────────────────
+// Muestra la gestión de partidos de un evento seleccionado
 async function manageMatches(req, res) {
   const { evento_id } = req.query;
   try {
@@ -58,7 +59,7 @@ async function manageMatches(req, res) {
       selectedEvent  = evRows[0] || null;
 
       if (selectedEvent) {
-        const [m]     = await MatchModel.findByEventAdmin(evento_id);
+        const [m]      = await MatchModel.findByEventAdmin(evento_id);
         matches        = m;
         matchCount     = m.length;
 
@@ -82,7 +83,7 @@ async function manageMatches(req, res) {
   }
 }
 
-// ── Generar partidos round-robin ──────────────────────────────
+// Genera todos los partidos en formato round-robin y pasa el evento a "en curso"
 async function generateMatches(req, res) {
   const evento_id = req.params.id;
   const conn = await db.getConnection();
@@ -131,7 +132,7 @@ async function generateMatches(req, res) {
   }
 }
 
-// ── Actualizar partido ────────────────────────────────────────
+// Actualiza el resultado y estado de un partido
 async function updateMatch(req, res) {
   const { id } = req.params;
   const { score_team1, score_team2, estado, fecha, evento_id } = req.body;
@@ -146,7 +147,7 @@ async function updateMatch(req, res) {
   }
 }
 
-// ── Finalizar torneo ──────────────────────────────────────────
+// Finaliza el torneo si todos los partidos han sido jugados
 async function finalizeEvent(req, res) {
   const { id } = req.params;
   try {

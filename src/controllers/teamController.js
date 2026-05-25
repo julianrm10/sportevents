@@ -1,6 +1,8 @@
+// Controlador de equipos: creación y eliminación de equipos de usuario
 const TeamModel         = require('../models/team.model');
 const RegistrationModel = require('../models/registration.model');
 
+// Crea un nuevo equipo asociado al usuario autenticado
 async function createTeam(req, res) {
   const { nombre, tipo } = req.body;
   const creator_id = req.user.id;
@@ -19,6 +21,7 @@ async function createTeam(req, res) {
   }
 }
 
+// Elimina un equipo si pertenece al usuario y no está en un torneo en curso
 async function deleteTeam(req, res) {
   const { id }     = req.params;
   const creator_id = req.user.id;
