@@ -87,28 +87,6 @@ CREATE TABLE IF NOT EXISTS favorites (
   CONSTRAINT fk_fav_evento FOREIGN KEY (evento_id) REFERENCES events(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ============================================
--- Datos de prueba
--- ============================================
 
--- Admin: admin@eventosport.com / admin123
-INSERT INTO users (nombre, email, password, role) VALUES
-('Administrador', 'admin@eventosport.com',
- '$2b$10$YourHashHere', -- reemplaza con hash real o usa el seed
- 'admin');
 
--- Nota: Para generar el hash correcto, ejecuta en Node.js:
--- require('bcrypt').hash('admin123', 10).then(console.log)
--- Luego actualiza el INSERT con el hash generado.
 
--- ============================================
--- Migraciones aplicadas
--- ============================================
-
--- Renombrar columnas de marcador en matches
--- ALTER TABLE matches CHANGE goles_team1 score_team1 INT NOT NULL DEFAULT 0,
---                            CHANGE goles_team2 score_team2 INT NOT NULL DEFAULT 0;
-
--- Actualizar ENUM de tipo en events y teams a 3 deportes
--- ALTER TABLE events MODIFY tipo ENUM('futbol','baloncesto','tenis') NOT NULL;
--- ALTER TABLE teams  MODIFY tipo ENUM('futbol','baloncesto','tenis') NOT NULL;

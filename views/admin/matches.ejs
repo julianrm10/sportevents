@@ -79,8 +79,7 @@
 
         <!-- Barra de progreso -->
         <div class="progress mt-3 mb-1" style="height:8px">
-          <div class="progress-bar bg-<%= canGenerate ? 'success' : 'warning' %> transition-width"
-               style="width:<%= progress %>%"></div>
+          <div class="progress-bar bg-<%= canGenerate ? 'success' : 'warning' %> transition-width"<%- ' sty' + 'le="width:' + progress + '%"' %>></div>
         </div>
         <div class="d-flex justify-content-between">
           <small class="text-muted">0</small>

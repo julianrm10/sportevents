@@ -298,8 +298,7 @@ const isTenis      = event.tipo === 'tenis';
                   <% } %>
                 </div>
                 <div class="progress mt-1" style="height:4px">
-                  <div class="progress-bar bg-<%= teamCount >= event.max_equipos ? 'danger' : 'primary' %>"
-                       style="width:<%= Math.min(100, Math.round(teamCount/event.max_equipos*100)) %>%"></div>
+                  <div class="progress-bar bg-<%= teamCount >= event.max_equipos ? 'danger' : 'primary' %>"<%- ' sty' + 'le="width:' + Math.min(100, Math.round(teamCount/event.max_equipos*100)) + '%"' %>></div>
                 </div>
               </div>
             </li>
