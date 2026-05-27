@@ -1,5 +1,4 @@
 // Controlador de administración: dashboard, gestión de eventos y partidos
-const db                = require('../db/connection');
 const EventModel        = require('../models/event.model');
 const TeamModel         = require('../models/team.model');
 const RegistrationModel = require('../models/registration.model');
@@ -86,11 +85,9 @@ async function manageMatches(req, res) {
 // Genera todos los partidos en formato round-robin y pasa el evento a "en curso"
 async function generateMatches(req, res) {
   const evento_id = req.params.id;
-  const conn = await db.getConnection();
   try {
     const [evRows] = await EventModel.findByIdRaw(evento_id);
     if (!evRows.length) {
-      conn.release();
       req.flash('error', 'Evento no encontrado.');
       return res.redirect(`/admin/partidos?evento_id=${evento_id}`);
     }
@@ -98,34 +95,20 @@ async function generateMatches(req, res) {
 
     const [[{ matchCount }]] = await MatchModel.countByEvent(evento_id);
     if (matchCount > 0) {
-      conn.release();
       req.flash('error', 'Los partidos ya fueron generados para este evento.');
       return res.redirect(`/admin/partidos?evento_id=${evento_id}`);
     }
 
     const [teams] = await TeamModel.findRegisteredByEvent(evento_id);
     if (teams.length < event.min_equipos) {
-      conn.release();
       req.flash('error', 'No hay suficientes equipos inscritos para generar los partidos.');
       return res.redirect(`/admin/partidos?evento_id=${evento_id}`);
     }
 
-    await conn.beginTransaction();
-    for (let i = 0; i < teams.length; i++) {
-      for (let j = i + 1; j < teams.length; j++) {
-        await MatchModel.create(evento_id, teams[i].id, teams[j].id, conn);
-      }
-    }
-    await EventModel.setEstado(evento_id, 'en_curso', conn);
-    await conn.commit();
-    conn.release();
-
-    const totalMatches = (teams.length * (teams.length - 1)) / 2;
+    const totalMatches = await MatchModel.generateRoundRobin(evento_id, teams);
     req.flash('success', `Partidos generados correctamente. ${totalMatches} partidos round-robin creados.`);
     res.redirect(`/admin/partidos?evento_id=${evento_id}`);
   } catch (err) {
-    await conn.rollback().catch(() => {});
-    conn.release();
     console.error(err);
     req.flash('error', 'Ha ocurrido un error, inténtalo de nuevo.');
     res.redirect(`/admin/partidos?evento_id=${evento_id}`);

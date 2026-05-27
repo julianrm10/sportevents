@@ -10,7 +10,6 @@ async function showProfile(req, res) {
   try {
     const [[userData]] = await UserModel.findById(user_id);
     if (!userData) {
-      res.clearCookie('token');
       return res.redirect('/auth/login');
     }
     const [registrations] = await RegistrationModel.findByUser(user_id);
