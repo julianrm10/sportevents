@@ -1,17 +1,9 @@
-// Middleware de autenticación: verifica que exista un token JWT válido en la cookie
-const jwt = require('jsonwebtoken');
-
+// Middleware de autenticación: verifica que exista una sesión de usuario activa
 function authMiddleware(req, res, next) {
-  const token = req.cookies.token;
-  if (!token) return res.redirect('/auth/login');
-  try {
-    req.user        = jwt.verify(token, process.env.JWT_SECRET);
-    res.locals.user = req.user;
-    next();
-  } catch {
-    res.clearCookie('token');
-    res.redirect('/auth/login');
-  }
+  if (!req.session.user) return res.redirect('/auth/login');
+  req.user        = req.session.user;
+  res.locals.user = req.session.user;
+  next();
 }
 
 module.exports = authMiddleware;

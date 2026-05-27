@@ -1,13 +1,6 @@
 // Controlador de autenticación: registro, login y logout de usuarios
 const bcrypt    = require('bcrypt');
-const jwt       = require('jsonwebtoken');
 const UserModel = require('../models/user.model');
-
-const COOKIE_OPTS = {
-  httpOnly: true,
-  sameSite: 'lax',
-  maxAge:   7 * 24 * 60 * 60 * 1000,
-};
 
 // Muestra el formulario de login
 function showLogin(req, res) {
@@ -21,7 +14,7 @@ function showRegister(req, res) {
   res.render('auth/register');
 }
 
-// Autentica al usuario y genera el token JWT
+// Autentica al usuario e inicia la sesión
 async function login(req, res) {
   const { email, password } = req.body;
   try {
@@ -36,12 +29,7 @@ async function login(req, res) {
       req.flash('error', 'Email o contraseña incorrectos.');
       return res.redirect('/auth/login');
     }
-    const token = jwt.sign(
-      { id: user.id, nombre: user.nombre, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-    res.cookie('token', token, COOKIE_OPTS);
+    req.session.user = { id: user.id, nombre: user.nombre, email: user.email, role: user.role };
     req.flash('success', `¡Bienvenido de nuevo, ${user.nombre}!`);
     res.redirect(user.role === 'admin' ? '/admin' : '/eventos');
   } catch (err) {
@@ -87,10 +75,9 @@ async function register(req, res) {
   }
 }
 
-// Elimina la cookie de sesión y redirige al login
+// Destruye la sesión y redirige al login
 function logout(req, res) {
-  res.clearCookie('token');
-  res.redirect('/auth/login');
+  req.session.destroy(() => res.redirect('/auth/login'));
 }
 
 module.exports = { showLogin, showRegister, login, register, logout };

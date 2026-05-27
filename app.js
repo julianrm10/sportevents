@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 const session      = require('express-session');
 const flash        = require('connect-flash');
 const path         = require('path');
-const jwt          = require('jsonwebtoken');
 
 const app = express();
 
@@ -19,31 +18,19 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Sesión necesaria para los mensajes flash
+// Sesión para autenticación y mensajes flash
 app.use(session({
-  secret:            process.env.JWT_SECRET,
+  secret:            process.env.SESSION_SECRET,
   resave:            false,
   saveUninitialized: false,
-  cookie:            { maxAge: 60 * 60 * 1000 },
+  cookie:            { maxAge: 7 * 24 * 60 * 60 * 1000 },
 }));
 app.use(flash());
 
-// Inyecta req.user y res.locals.user en cada petición a partir del JWT de la cookie
+// Inyecta req.user y res.locals.user en cada petición a partir de la sesión
 app.use((req, res, next) => {
-  const token = req.cookies.token;
-  if (token) {
-    try {
-      const decoded   = jwt.verify(token, process.env.JWT_SECRET);
-      req.user        = decoded;
-      res.locals.user = decoded;
-    } catch {
-      req.user        = null;
-      res.locals.user = null;
-    }
-  } else {
-    req.user        = null;
-    res.locals.user = null;
-  }
+  req.user        = req.session.user || null;
+  res.locals.user = req.session.user || null;
   next();
 });
 

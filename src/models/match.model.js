@@ -64,8 +64,33 @@ function update(id, score_team1, score_team2, estado, fecha) {
   );
 }
 
+// Genera los partidos round-robin para un evento dentro de una transacción y cambia el estado del evento a "en_curso"
+async function generateRoundRobin(evento_id, teams) {
+  const EventModel = require('./event.model');
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+    for (let i = 0; i < teams.length; i++) {
+      for (let j = i + 1; j < teams.length; j++) {
+        await conn.query(
+          'INSERT INTO matches (evento_id, team1_id, team2_id) VALUES (?, ?, ?)',
+          [evento_id, teams[i].id, teams[j].id]
+        );
+      }
+    }
+    await EventModel.setEstado(evento_id, 'en_curso', conn);
+    await conn.commit();
+    conn.release();
+    return (teams.length * (teams.length - 1)) / 2;
+  } catch (err) {
+    await conn.rollback().catch(() => {});
+    conn.release();
+    throw err;
+  }
+}
+
 module.exports = {
   findByEvent, findByEventAdmin,
   countByEvent, countPending, countPendingByEvent,
-  create, update,
+  create, update, generateRoundRobin,
 };
