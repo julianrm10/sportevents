@@ -61,7 +61,7 @@ Plataforma web de gestión de torneos deportivos amateur. Permite a los usuarios
 
 7. **Acceder a la aplicación**
 
-   Abre el navegador en [http://localhost:3000](http://localhost:3000)
+   Abre el navegador en [http://localhost:3000]
 
 ## Variables de entorno
 

@@ -23,7 +23,7 @@ async function showDashboard(req, res) {
   }
 }
 
-// Lista todos los eventos con sus métricas, con filtro opcional por estado
+// Lista todos los eventos, con filtro opcional por estado
 async function manageEvents(req, res) {
   const { estado } = req.query;
   const validEstados = ['abierto', 'en_curso', 'finalizado'];
