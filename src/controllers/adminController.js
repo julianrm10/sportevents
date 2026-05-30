@@ -120,7 +120,7 @@ async function updateMatch(req, res) {
   const { id } = req.params;
   const { score_team1, score_team2, estado, fecha, evento_id } = req.body;
   try {
-    const fechaMysql = fecha ? fecha.replace('T', ' ') + ':00' : null;
+    const fechaMysql = fecha ? (fecha.replace('T', ' ') + ':00').substring(0, 19) : null;
     await MatchModel.update(id, score_team1 || 0, score_team2 || 0, estado, fechaMysql);
     req.flash('success', 'Partido actualizado correctamente.');
     res.redirect(`/admin/partidos?evento_id=${evento_id}`);
