@@ -46,7 +46,6 @@ CREATE TABLE IF NOT EXISTS teams (
 ) ENGINE=InnoDB;
 
 -- Tabla de inscripciones
--- team_id es nullable: NULL = inscripción individual, valor = equipo inscrito
 CREATE TABLE IF NOT EXISTS registrations (
   id         INT AUTO_INCREMENT PRIMARY KEY,
   user_id    INT NOT NULL,
