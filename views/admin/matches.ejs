@@ -172,7 +172,7 @@
           <button type="button" class="btn btn-warning fw-semibold px-4"
                   data-form="form-finalizar-<%= selectedEvent.id %>"
                   data-msg="¿Finalizar el torneo? Esta acción cerrará el evento y mostrará la clasificación final."
-                  onclick="showConfirmModal(this.dataset.msg, this.dataset.form)">
+                  onclick="showConfirmModal(this.dataset.msg, this.dataset.form, { title: '¿Finalizar torneo?', titleIcon: 'bi-flag-fill', titleIconClass: 'text-warning', btnText: 'Confirmar', btnIcon: 'bi-flag-fill', btnClass: 'btn-warning' })">
             <i class="bi bi-flag-fill me-2"></i>Finalizar torneo
           </button>
         </form>
